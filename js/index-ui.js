@@ -12,8 +12,9 @@ function bakeCookies() {
 
 function validation(usr, days) {
     enteredUserName = usr;
-    enteredDaysToDisplay = days;
-    if (!enteredUserName || !enteredDaysToDisplay || enteredDaysToDisplay > 7 || enteredDaysToDisplay < 1 || enteredUserName === "Channel ID or Username" || enteredDaysToDisplay === "Number of days") {
+    enteredDaysToDisplay = Number(days);
+    console.log((enteredDaysToDisplay / 1) !== enteredDaysToDisplay);
+    if (!enteredUserName || !enteredDaysToDisplay || enteredDaysToDisplay > 7 || enteredDaysToDisplay < 1 || enteredUserName === "Channel ID or Username" || enteredDaysToDisplay === "Number of days" || isNaN(enteredDaysToDisplay) ) {
         alert("Please enter a valid Username and number of days to display videos for.");
         $(location).attr("href", "/eytca/");
     } else {

@@ -1,7 +1,7 @@
 var queue;
 function replaceVideo(video) {
-    document.getElementById('vid').innerHTML = '<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + queue[video][1] + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1>'
-     + queue[video][3] + ' hours ago | ' + queue[video][5] + ' Views | &uarr; ' + queue[video][6] + ', &darr; ' + queue[video][7] + ' | <a href="http://www.youtube.com/watch?v=' + queue[video][1]
+    document.getElementById('vid').innerHTML = '<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + queue[video][0] + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1>'
+     + queue[video][1] + ' hours ago | ' + queue[video][2] + ' Views | &uarr; ' + queue[video][3] + ', &darr; ' + queue[video][4] + ' | <a href="http://www.youtube.com/watch?v=' + queue[video][0]
       + '" target="_blank">View on YouTube</a></h1></div>';
 }
 function removeFromQueue(video) {
@@ -21,12 +21,15 @@ $(document).ready(function(){
     }
     if ($.cookie("queue") && $.cookie("queue") !== "[]") {
         queue = JSON.parse($.cookie("queue"));
-        for (i = 0; i < queue.length; i++) {
-            queueHtml += '<div id="video"><a href="" id="vid" onClick="replaceVideo(\'' + [i] + '\');return false;"><img src="https://i.ytimg.com/vi/' + queue[i][1] + '/mqdefault.jpg" width="235px"/><span class="videoInfo"><span class="title">'
-             + queue[i][0] + '</span></a><p>' + queue[i][3] + ' hours ago | ' + queue[i][4] + ' | ' + queue[i][5] + ' Views | &uarr; ' + queue[i][6] + ', &darr; ' + queue[i][7] + '<br /><a href="#" onClick="removeFromQueue('
-              + [i] + ')">Remove</a><p><span class="desc">' + queue[i][2] + '</span></span></div>';
+        queueHtml = "";
+        for (var i = 0; i < queue.length; i++) {
+            queueHtml += '<div id="video"><a href="" id="vid" onClick="replaceVideo(\'' + [i] + '\');return false;"><img src="https://i.ytimg.com/vi/' + queue[i][0] + '/mqdefault.jpg" width="235px"/><span class="videoInfo"><span class="title">'
+             + queue[i][5] + '</span></a><p>' + queue[i][1] + ' hours ago | ' + queue[i][7] + ' | ' + queue[i][2] + ' Views | &uarr; ' + queue[i][3] + ', &darr; ' + queue[i][4] + '<br /><a href="#" onClick="removeFromQueue('
+              + [i] + ')">Remove</a><p><span class="desc">' + queue[i][6] + '</span></span></div>';
+            if (i === queue.length-1) {
+                document.getElementById('contentArea').innerHTML = queueHtml;
+            }
         }
-        document.getElementById('contentArea').innerHTML = '<p>Queue: ' + queueHtml;
         $('#contentArea').show();
     }
     videoMod = "";

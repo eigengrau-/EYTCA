@@ -18,13 +18,7 @@ function logout() {
 }
 
 //Called with every API request
-function catchExceptions() {
-    if (typeof result.pageInfo !== "undefined") {
-        if (result.pageInfo.resultsPerPage !== 50 && result.pageInfo.totalResults === 0) {
-            alert('Error: Account/Videos not found. Redirecting back to the homepage.');
-            logout();
-        }
-    }
+function errorHandling() {
     if (typeof result.error !== "undefined") {
         alert('Error: ' + result.error.data[0].reason + '. Redirecting back to the homepage.');
         logout();
@@ -40,7 +34,8 @@ function Video(title, id, description, thumbnail, date) {
     this.date = currentTime.diff(moment(date), "hours");
     var _this = this;
     this.infoArr = function() {    //Called when added to page for video popup info.
-        return _this.id + ',' +  _this.date + ',' +  _this.views + ',' +  _this.likes + ',' +  _this.dislikes + ',' + _this.title;
+        return _this.id + ',' +  _this.date + ',' +  _this.views + ',' +  _this.likes + ',' +  _this.dislikes + ',' + _this.title.replace(/,/g, "").replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + ','
+         + _this.description.replace(/,/g, "").replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + ',' + _this.duration;
     };
     //The following properties are added on creation: Duration, views, likes, dislikes.
 }
@@ -61,7 +56,7 @@ function Channel(readableName, channelId, avatar) {
             order: 'date'
         });
         request.execute(function(result) {
-            if (result.error) { catchExceptions(); }
+            if (result.error) { errorHandling(); }
             if (result.items && result.pageInfo && result.pageInfo.totalResults > 0) {
                 for (var k = 0; k < result.items.length; k++) {
                     tempVideoIds[k] = result.items[k].id.videoId;
@@ -96,9 +91,7 @@ function Channel(readableName, channelId, avatar) {
             currentUser.newVideos++;
             html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">'
              + this.videos[i].title + '</span></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
-              + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \''
-               + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].date + '\', \'' + this.videos[i].duration + '\', \'' + this.videos[i].views + '\', \'' + this.videos[i].likes
-                + '\', \'' + this.videos[i].dislikes + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
+              + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].infoArr() + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
         }
     };
 }
@@ -119,10 +112,9 @@ function User() {
     this.newVideos = 0;
     this.totalSubs = 0;
     this.currentPage = 0;
-    this.nextPage;
     var _this = this;
     this.idCheck = function() {
-        if ($.cookie("user").length === 24 && $.cookie("user").charAt(0) === "U" && $.cookie("user").charAt(1) === "C") {    //User entered their channel id.
+        if ($.cookie("user").match(/UC+(?=\w{22})/) !== null) {    //User entered their channel id.
             _this.userId = $.cookie("user");
             return true;
         } else {    //User entered their username.
@@ -147,7 +139,11 @@ function User() {
         }
         request.execute(function(result) {
             loading(40, 'Response recieved');
-            if (result.error) {catchExceptions();}
+            if (result.error) {errorHandling();}
+            if (result.pageInfo.totalResults === 0) {
+                alert("User not found.");
+                logout();
+            }
             _this.userId = result.items[0].id;
             _this.avatar = result.items[0].snippet.thumbnails.high.url;
             _this.readableName = result.items[0].snippet.title;
@@ -180,7 +176,11 @@ function User() {
         request.execute(function(result) {
             loading(70, 'Response recieved');
             _this.currentPage++;
-            if (result.error) {catchExceptions();}
+            if (result.error) {errorHandling();}
+            if (result.pageInfo.totalResults === 0) {
+                alert("Subscriptions not found.");
+                logout();
+            }
             if (_this.totalSubs === 0) {_this.totalSubs = result.pageInfo.totalResults;}
             loading(80, 'Parsing ' + _this.totalSubs + ' subscriptions');
             //Channel creation.
@@ -195,8 +195,14 @@ function User() {
             }
         });
     };
-    this.addToQueue = function(title, id, desc, date, duration, views, likes, dislikes) {
-        this.queue.push([title, id, desc, date, duration, views, likes, dislikes]);
+    this.addToQueue = function(infoArr) {
+        var tempArr = infoArr.split(",");
+        for (var i = 0; i < _this.queue.length; i++) {
+            if (tempArr[0] === _this.queue[i][0]) {
+                return;
+            }
+        }
+        this.queue.push(tempArr);
         $.cookie("queue", JSON.stringify(this.queue), {
             path: "/eytca/",
             expires: 365
