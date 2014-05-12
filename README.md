@@ -1,4 +1,8 @@
 EYTCA
 =====
 
-EYTCA is a YouTube channel aggregator that displays all the videos of a user's subscriptions for a specified number of days. This service was created to make viewing and navigating all your subscription's recently uploaded videos easier, which is convenient for users who watch YouTube instead of cable television.
+EYTCA is a YouTube channel aggregator which displays the latest videos for all of a user's subscriptions within a specified date range.
+
+This service was designed for people who use YouTube as a replacement for cable television. Navigating YouTube when one has numerous subscriptions can become cumbersome, so this service is ideal to view all of your favourite channel's new videos at a glance.
+
+Libraries and APIs utilized in this service are the following: <a href="http://jqueryui.com/">jQuery/UI</a>, <a href="http://github.com/carhartl/jquery-cookie">jQuery Cookie</a>, <a href="http://momentjs.com/">Moment.js</a>, and <a href="http://developers.google.com/youtube/v3/">YouTube API v3</a>.
