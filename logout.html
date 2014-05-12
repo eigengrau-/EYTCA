@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<head>
+	<link rel="stylesheet" type="text/css" href="/eytca/css/yt2.css" />
+	<link rel="stylesheet" type="text/css" href="/eytca/css/jquery-ui-1.10.3.custom.css" />
+	<script type="text/javascript" src="/eytca/js/jquery-1.10.2.js"></script>
+	<script type="text/javascript" src="/eytca/js/jquery-ui-1.10.3.custom.js"></script>
+	<script type="text/javascript" src="/eytca/js/jquery.tools.min.js"></script>
+	<script src="/eytca/js/jquery.cookie.js"></script>
+	<script src="http://apis.google.com/js/client.js?onload=onClientLoad" type="text/javascript"></script>
+	<link rel="icon" type="image/png" href="/fq-fav.png">
+<script>
+	$.removeCookie("user", { path: "/eytca/" });
+	$.removeCookie("chan", { path: "/eytca/" });
+	$.removeCookie("days", { path: "/eytca/" });
+	console.log("Cookies cleared.");
+	$(location).attr("href", "/eytca/");
+</script>
+</head>
+<body>
+</body>
+</html>
