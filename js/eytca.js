@@ -222,9 +222,19 @@ function apiRequest(type) {
 }
 
 function lastSubCheckTick() {
-    if (tempNumSubs >= currentUser.totalSubs - 1) {
+    if (tempNumSubs === currentUser.totalSubs) {
+        currentUser.subscriptions.sort(function(a,b) {return (a.readableName > b.readableName) ? 1 : ((b.readableName > a.readableName) ? -1 : 0);} );
         currentUser.display();
         clearInterval(checkTick);
+    }
+}
+
+function compare(a,b) {
+    if (a.readableName < b.readableName) {
+        return -1;
+    }
+    if (a.readableName > b.readableName) {
+        return 1;
     }
 }
 
@@ -251,7 +261,7 @@ function onSearchResponse(response) {
         default.url);
             tempSubscriptionsLength = currentUser.subscriptions.length;
         }
-        if (result.nextPageToken !== undefined && result.items.length === 49) {
+        if (result.nextPageToken !== undefined && result.items.length === 50) {
             nextPage = result.nextPageToken;
             apiRequest('GetAllSubscriptions');
         } else {
@@ -352,7 +362,7 @@ function onClientLoad() {
 
 function onYouTubeApiLoad() {
     loading(10, "API Loaded");
-    gapi.client.setApiKey('AIzaSyCR5In4DZaTP6IEZQ0r1JceuvluJRzQNLE');
+    gapi.client.setApiKey('AIzaSyAovj5X_gBnFTX2uJkGwYabTOX5pPGqJQE');
     currentUser = new User();
     currentUser.getInfo();
 }
