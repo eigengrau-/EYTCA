@@ -3,8 +3,6 @@ var html = [];
 var chanList = [];
 var queueHtml = '';
 var currentPage = 0;
-var newVideos = 0;
-var tempNumSubs = 0;
 var tempSubscriptionsLength = 0;
 
 function loading(val, msg) {
@@ -136,17 +134,12 @@ function Channel(readableName, channelId, avatar) {
         this.videos = [];
         responseString = JSON.stringify(response, '', 2);
         result = JSON.parse(responseString);
-        catchExceptions();
+        if (result.error) {catchExceptions();}
         if (result.pageInfo.totalResults > 0 && result.items !== undefined) {
             var k;
             for (k = 0; k < result.items.length; k++) {
                 tempVideos[k] = new Video(result.items[k].snippet.title, result.items[k].id.videoId, result.items[k].snippet.description, result.items[k].snippet.thumbnails.medium.url, result.items[k].snippet.publishedAt);
-                if (k === result.items.length - 1) {
-                    tempNumSubs++;
-                }
             }
-        } else {
-            tempNumSubs++;
         }
     };
     this.getVideos();
@@ -156,12 +149,20 @@ function Channel(readableName, channelId, avatar) {
         html.push('<div id="chanTitle" align="left"><img src="' + this.avatar + '" width="50px"/><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank">' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><p><a href="#top">TOP &uarr;</a></div>');
         var i, currentTime, published;
         for (i = 0; i < this.videos.length; i++) {
-            newVideos++;
+            currentUser.newVideos++;
             currentTime = moment();
             published = moment(this.videos[i].date);
             html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].id + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">' + this.videos[i].title + '</span></a><p>' + currentTime.diff(published, "hours") + ' hours ago | <a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \'' + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].thumbnail + '\', \'' + published.format('MMMM Do YYYY, h:mm:ss a') + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
         }
     };
+}
+
+function lastSubCheckTick() {
+    if (currentUser.subscriptions.length >= currentUser.totalSubs - currentPage) {
+        currentUser.subscriptions.sort(function(a,b) {return (a.readableName.toLowerCase() > b.readableName.toLowerCase()) ? 1 : ((b.readableName.toLowerCase() > a.readableName.toLowerCase()) ? -1 : 0);} );
+        currentUser.display();
+        clearInterval(checkTick);
+    }
 }
 
 function apiRequest(type) {
@@ -192,7 +193,6 @@ function apiRequest(type) {
             maxResults: 50,
             order: 'alphabetical'
         });
-        currentPage = 1;
         requestType = 'GetSubscriptions';
         request.execute(onSearchResponse);
         break;
@@ -206,35 +206,12 @@ function apiRequest(type) {
             maxResults: 50,
             order: 'alphabetical'
         });
-        currentPage += 1;
-        if (currentPage !== 1 + totalPages) {
-            loading(85, "Retrieving videos.");
-            requestType = 'GetSubscriptions';
-            request.execute(onSearchResponse);
-        } else {
-            totalSubs = currentUser.subscriptions.length;
-            tempNumSubs = totalSubs;
-        }
+        loading(85, "Retrieving videos.");
+        requestType = 'GetSubscriptions';
+        request.execute(onSearchResponse);
         break;
     default:
         alert('No response given.');
-    }
-}
-
-function lastSubCheckTick() {
-    if (tempNumSubs === currentUser.totalSubs) {
-        currentUser.subscriptions.sort(function(a,b) {return (a.readableName > b.readableName) ? 1 : ((b.readableName > a.readableName) ? -1 : 0);} );
-        currentUser.display();
-        clearInterval(checkTick);
-    }
-}
-
-function compare(a,b) {
-    if (a.readableName < b.readableName) {
-        return -1;
-    }
-    if (a.readableName > b.readableName) {
-        return 1;
     }
 }
 
@@ -243,25 +220,26 @@ function onSearchResponse(response) {
     case 'GetUserInfo':
         responseString = JSON.stringify(response, '', 2);
         result = JSON.parse(responseString);
-        catchExceptions();
+        if (result.error) {catchExceptions();}
         currentUser.userId = result.items[0].id;
         currentUser.avatar = result.items[0].snippet.thumbnails.
-    default.url;
+    high.url;
         currentUser.readableName = result.items[0].snippet.title;
         currentUser.getSubscriptions();
         break;
     case 'GetSubscriptions':
         responseString = JSON.stringify(response, '', 2);
         result = JSON.parse(responseString);
-        catchExceptions();
+        if (result.error) {catchExceptions();}
+        currentPage++;
+        if (currentUser.totalSubs === 0) {
+            currentUser.totalSubs = result.pageInfo.totalResults;
+        }
         var i;
         for (i = 0; i < result.items.length; i++) {
-            currentUser.totalSubs++;
-            currentUser.subscriptions[tempSubscriptionsLength] = new Channel(result.items[i].snippet.title, result.items[i].snippet.resourceId.channelId, result.items[i].snippet.thumbnails.
-        default.url);
-            tempSubscriptionsLength = currentUser.subscriptions.length;
+            currentUser.subscriptions[currentUser.subscriptions.length] = new Channel(result.items[i].snippet.title, result.items[i].snippet.resourceId.channelId, result.items[i].snippet.thumbnails.default.url);
         }
-        if (result.nextPageToken !== undefined && result.items.length === 50) {
+        if (result.nextPageToken !== undefined) {
             nextPage = result.nextPageToken;
             apiRequest('GetAllSubscriptions');
         } else {
@@ -315,7 +293,6 @@ function User() {
     this.subscriptions = [];
     this.queue = [];
     this.newVideos = 0;
-    this.subscriptionsPages = 1;
     this.totalSubs = 0;
     this.getInfo = function() {
         loading(35, "Retrieving user information.");
@@ -349,7 +326,9 @@ function User() {
         $("#info3:hidden").show();
         $("#chanList:hidden").show();
         $('#contentArea').show();
-        document.getElementById('info3').innerHTML = '<p><img src="' + this.avatar + '" width="88px"/><p><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + newVideos + '| Total Subscriptions: ' + this.subscriptions.length + '<p><div id="queue"><a href="" onClick="popup(\'queue\');return false;">Queue</a></div></p><p><div id="clearCookies"><a href="/eytca/logout.html">Logout</a></div></p>';
+        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + this.newVideos + '| Total Subscriptions: ' + this.subscriptions.length + '</p></div><div id="queue"><a href="" onClick="popup(\'queue\');return false;">Queue</a></div><div id="clearCookies"><a href="/eytca/logout.html">Logout</a></div>';
+        $('#info3').css("background-image", "url('" + this.avatar + "')");
+        $('#info3').css("background-size", "100%");
         document.getElementById('chanList').innerHTML = chanList.join('');
         document.getElementById('contentArea').innerHTML = html.join('');
     };

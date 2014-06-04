@@ -107,6 +107,15 @@ form {
     font-size: 15px;
 }
 
+#userInfo {
+    margin-top: 25%;
+    padding: 5px;
+    border-radius: 5px;
+    font-family: Cambria, Georgia, serif;
+    background: rgba(35,44,49,.7);
+    text-align: center;
+}
+
 #button:hover,#button2:hover,#button3:hover,#button4:hover,#clearCookies:hover,#after:hover,#loadingLogout:hover,#queue:hover {
     background: #506570;
 }
@@ -187,16 +196,17 @@ form {
 }
 
 .infoTitle3 a {
-    font-size: 20px;
-    font-weight: 500;
+    font-size: 25px;
+    font-weight: 700;
     margin: 0;
-    text-shadow: 4px 4px 30px #000;
+    text-shadow: 2px 2px 2px #000;
 }
 
 .infoTitle3 p {
     font-size: 14px;
     font-weight: 400;
     margin-bottom: 5px;
+    text-shadow: 2px 2px 2px #000;
 }
 
 #info {
