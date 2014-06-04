@@ -274,7 +274,7 @@ function popup(vid) {
             path: "/eytca/"
         });
     }
-    window.open("/eytca/video.html", "_blank", "width=1298,height=750,menubar=0,scrollbars=0,status=0,toolbar=0,");
+    window.open("/eytca/video.html", "fullscreen=yes, scrollbars=auto");
 }
 
 function User() {
