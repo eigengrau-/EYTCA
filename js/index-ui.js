@@ -10,8 +10,6 @@ function bakeCookies() {
 
 $(document).ready(function() {
 
-    $("#infoHome:hidden").slideDown("slow");
-
     $("input[name=chanIDUser]").click(function() {
         $(this).attr("value", "");
     });

@@ -4,7 +4,9 @@ var chanList = [];
 var queueHtml = '';
 var currentPage = 0;
 var tempSubscriptionsLength = 0;
+var currentTime;
 
+//Displays loading text/percentage with jQueryUI.
 function loading(val, msg) {
     $("#progressbar").progressbar({
         value: val
@@ -13,9 +15,14 @@ function loading(val, msg) {
 }
 
 function logout() {
-    $(location).attr("href", "logout.html");
+    $.removeCookie("user", { path: "/eytca/" });
+    $.removeCookie("chan", { path: "/eytca/" });
+    $.removeCookie("days", { path: "/eytca/" });
+    console.log("Cookies cleared.");
+    $(location).attr("href", "/eytca/");
 }
 
+//Called with every API request
 function catchExceptions() {
     if (typeof result.pageInfo !== "undefined") {
         if (result.pageInfo.resultsPerPage !== 50 && result.pageInfo.totalResults === 0) {
@@ -106,59 +113,83 @@ function catchExceptions() {
     }
 }
 
+//Object constructor for individual videos.
 function Video(title, id, description, thumbnail, date) {
     this.title = title;
     this.id = id;
     this.description = description;
     this.thumbnail = thumbnail;
-    this.date = date;
+    this.date = currentTime.diff(moment(date), "hours");
+    this.infoArr = function() {    //Called when added to page for video popup info.
+        return this.id + ',' +  this.date + ',' +  this.views + ',' +  this.likes + ',' +  this.dislikes;
+    };
+    //The following properties are added on creation: Duration, views, likes, dislikes.
 }
 
+//Object constructor for individual channels.
 function Channel(readableName, channelId, avatar) {
-    var tempVideos = [];
+    var tempVideos = [];        //Temp array for videos while they are being returned. Becomes this.videos.
+    var tempVideoIds = [];      //Temp array of video ids for requesting their info. Includes duration, views, likes, dislikes.
     this.readableName = readableName;
     this.channelId = channelId;
     this.avatar = avatar;
-    this.getVideos = function() {
+    this.getVideos = function(callback) {    //Gets each channel's videos. Called on creation of object.
         var request = gapi.client.youtube.search.list({
             part: 'snippet',
             channelId: this.channelId,
-            publishedAfter: now.format('YYYY-MM-DDTHH:mm:ssZ'),
+            publishedAfter: now.format('YYYY-MM-DDTHH:mm:ssZ'),    //Moment.js formatting.
             maxResults: 50,
             order: 'date'
         });
-        requestType = 'GetVideos';
-        request.execute(this.onSearchResponse);
-    };
-    this.onSearchResponse = function(response) {
-        this.videos = [];
-        responseString = JSON.stringify(response, '', 2);
-        result = JSON.parse(responseString);
-        if (result.error) {catchExceptions();}
-        if (result.pageInfo.totalResults > 0 && result.items !== undefined) {
-            var k;
-            for (k = 0; k < result.items.length; k++) {
-                tempVideos[k] = new Video(result.items[k].snippet.title, result.items[k].id.videoId, result.items[k].snippet.description, result.items[k].snippet.thumbnails.medium.url, result.items[k].snippet.publishedAt);
+        request.execute(function(response) {
+            responseString = JSON.stringify(response, '', 2);
+            result = JSON.parse(responseString);
+            this.videos = [];
+            if (result.error) { catchExceptions(); }
+            if (result.items && result.pageInfo && result.pageInfo.totalResults > 0) {
+                for (var k = 0; k < result.items.length; k++) {
+                    tempVideoIds[k] = result.items[k].id.videoId;
+                    tempVideos[k] = new Video(result.items[k].snippet.title, result.items[k].id.videoId, result.items[k].snippet.description, result.items[k].snippet.thumbnails.medium.url, result.items[k].snippet.publishedAt);
+                    if (k === result.items.length - 1) {
+                        callback();
+                    }
+                }
             }
-        }
+        });
     };
-    this.getVideos();
+    this.getVideos(function() {         //Get Channel's videos, callback function requests all videos info.
+        var request = gapi.client.youtube.videos.list({
+            part: 'contentDetails, statistics',
+            id: tempVideoIds.join(),    //Requests info of all videos simultaneously.
+            maxResults: 50,
+        });
+        request.execute(function(response) {
+            responseString = JSON.stringify(response, '', 2);
+            result = JSON.parse(responseString);
+            for (var x = 0; x < result.items.length; x++) {
+                tempVideos[x].duration = result.items[x].contentDetails.duration.replace("PT", "").toLowerCase();
+                tempVideos[x].views = result.items[x].statistics.viewCount;
+                tempVideos[x].likes = result.items[x].statistics.likeCount;
+                tempVideos[x].dislikes = result.items[x].statistics.dislikeCount;
+            }
+        });
+    });
     this.videos = tempVideos;
-    this.display = function() {
-        chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');
-        html.push('<div id="chanTitle" align="left"><img src="' + this.avatar + '" width="50px"/><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank">' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><p><a href="#top">TOP &uarr;</a></div>');
+    this.display = function() {    //Called by User Display method.
+        chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' | ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
+        html.push('<div id="chanTitle" align="left"><img src="' + this.avatar + '" width="80px" height="80px"/><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank">' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><p><a href="#top">TOP &uarr;</a></div>');
         var i, currentTime, published;
         for (i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
-            currentTime = moment();
-            published = moment(this.videos[i].date);
-            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].id + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">' + this.videos[i].title + '</span></a><p>' + currentTime.diff(published, "hours") + ' hours ago | <a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \'' + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].thumbnail + '\', \'' + published.format('MMMM Do YYYY, h:mm:ss a') + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
+            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">' + this.videos[i].title + '</span></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \'' + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].date + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
         }
     };
 }
 
+//Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
 function lastSubCheckTick() {
     if (currentUser.subscriptions.length >= currentUser.totalSubs - currentPage) {
+        //Sorts channel by name. Requesting the channels to be sorted alphabetically is not reliable.
         currentUser.subscriptions.sort(function(a,b) {return (a.readableName.toLowerCase() > b.readableName.toLowerCase()) ? 1 : ((b.readableName.toLowerCase() > a.readableName.toLowerCase()) ? -1 : 0);} );
         currentUser.display();
         clearInterval(checkTick);
@@ -168,7 +199,7 @@ function lastSubCheckTick() {
 function apiRequest(type) {
     var request;
     switch (type) {
-    case 'GetUserInfo':
+    case 'GetUserInfo':    //Called from User on creation.
         if (currentUser.idOrUsername === false) {
             request = gapi.client.youtube.channels.list({
                 part: 'snippet',
@@ -185,7 +216,7 @@ function apiRequest(type) {
             request.execute(onSearchResponse);
         }
         break;
-    case 'GetSubscriptions':
+    case 'GetSubscriptions':    //Called from GetSubscriptions User method.
         request = gapi.client.youtube.subscriptions.list({
             part: 'snippet',
             fields: 'items/snippet,nextPageToken,pageInfo',
@@ -196,7 +227,7 @@ function apiRequest(type) {
         requestType = 'GetSubscriptions';
         request.execute(onSearchResponse);
         break;
-    case 'GetAllSubscriptions':
+    case 'GetAllSubscriptions':    //The maximum results per request is 50.
         loading(65, "Retrieving videos.");
         request = gapi.client.youtube.subscriptions.list({
             part: 'snippet',
@@ -222,8 +253,7 @@ function onSearchResponse(response) {
         result = JSON.parse(responseString);
         if (result.error) {catchExceptions();}
         currentUser.userId = result.items[0].id;
-        currentUser.avatar = result.items[0].snippet.thumbnails.
-    high.url;
+        currentUser.avatar = result.items[0].snippet.thumbnails.high.url;
         currentUser.readableName = result.items[0].snippet.title;
         currentUser.getSubscriptions();
         break;
@@ -235,8 +265,8 @@ function onSearchResponse(response) {
         if (currentUser.totalSubs === 0) {
             currentUser.totalSubs = result.pageInfo.totalResults;
         }
-        var i;
-        for (i = 0; i < result.items.length; i++) {
+        //Channel creation.
+        for (var i = 0; i < result.items.length; i++) {
             currentUser.subscriptions[currentUser.subscriptions.length] = new Channel(result.items[i].snippet.title, result.items[i].snippet.resourceId.channelId, result.items[i].snippet.thumbnails.default.url);
         }
         if (result.nextPageToken !== undefined) {
@@ -251,39 +281,62 @@ function onSearchResponse(response) {
     }
 }
 
+//Video viewer window.
 function popup(vid) {
-    $.removeCookie("currentQueue", {
-        path: "/eytca/"
-    });
+    //queueAjax("get");
     if (vid !== "queue") {
-        $.cookie("videoPopup", vid, {
-            path: "/eytca/"
+        $.removeCookie("videoPopup", { path: '/eytca/video.html' });
+        $.cookie('videoPopup', vid, {
+            path: '/eytca/video.html'
         });
     } else {
-        $.removeCookie("videoPopup", {
-            path: "/eytca/"
-        });
+        $.removeCookie("videoPopup", { path: '/eytca/video.html' });
     }
     if (currentUser.queue.length > 0) {
-        queueHtml = '';
-        var i;
-        for (i = 0; i < currentUser.queue.length; i++) {
-            queueHtml += '<div id="video"><a href="" id="vid" onClick="popup(\'' + currentUser.queue[i][1] + '\');return false;"><img src="' + currentUser.queue[i][3] + '" width="235px"/><span class="videoInfo"><span class="title">' + currentUser.queue[i][0] + '</span></a><p>' + currentUser.queue[i][4] + '<p><span class="desc">' + currentUser.queue[i][2] + '</span></span></div>';
-        }
-        $.cookie("currentQueue", queueHtml, {
-            path: "/eytca/"
+        $.cookie("currentQueue", currentUser.userId, {
+            path: "/eytca/video.html"
         });
     }
     window.open("/eytca/video.html", "fullscreen=yes, scrollbars=auto");
 }
 
+//WIP video queue.
+/*function queueAjax(updateGet) {
+    if (updateGet === "update") {
+        //Add video to queue
+        $.ajax({
+            type: "POST",
+            url: "queue.php",
+            dataType: "text json",
+            data: { username: currentUser.userId, queue: JSON.stringify(currentUser.queue)}
+        })
+            .done(function( msg ) {
+                //Update userobj.queue
+                $.get( "queueGet.php", { username: currentUser.userId } )
+                    .done(function( data ) {
+                        if (data) {
+                            currentUser.queue = JSON.parse(data);
+                        }
+                    });
+            });
+    } else {
+        $.get( "queueGet.php", { username: currentUser.userId } )
+        .done(function( data ) {
+            if (data) {
+                currentUser.queue = JSON.parse(data);
+            }
+        });
+    }
+    }*/
+
+//User Object
 function User() {
     this.idOrUsername;
     this.idCheck = function() {
-        if ($.cookie("user").length === 24 && $.cookie("user").charAt(0) === "U" && $.cookie("user").charAt(1) === "C") {
+        if ($.cookie("user").length === 24 && $.cookie("user").charAt(0) === "U" && $.cookie("user").charAt(1) === "C") {    //User entered their channel id.
             this.idOrUsername = true;
             this.userId = $.cookie("user");
-        } else {
+        } else {    //User entered their username.
             this.idOrUsername = false;
             this.readableName = $.cookie("user");
         }
@@ -296,52 +349,61 @@ function User() {
     this.totalSubs = 0;
     this.getInfo = function() {
         loading(35, "Retrieving user information.");
-        now = moment().subtract('days', this.numDaysToDisplay);
+        now = moment().subtract('days', this.numDaysToDisplay);    //Moment.js formatting.
         apiRequest('GetUserInfo');
     };
     this.getSubscriptions = function() {
         loading(45, "Requesting user subscriptions list.");
         apiRequest('GetSubscriptions');
     };
-    this.addToQueue = function(title, id, desc, thumb, date) {
-        this.queue.push([title, id, desc, thumb, date]);
+    this.addToQueue = function(title, id, desc, date) {
+        this.queue.push([title, id, desc, date]);
+        //queueAjax("update");
     };
     this.displayQueue = function() {
         popup("queue");
     };
     this.display = function() {
-        var i;
-        for (i = 0; i < this.subscriptions.length; i++) {
+        $.removeCookie("currentQueue", {
+            path: "/eytca/"
+         });
+        //queueAjax("get");
+        for (var i = 0; i < this.subscriptions.length; i++) {
             if (this.subscriptions[i].videos.length > 0) {
                 this.subscriptions[i].display();
             } else {
+                //Channel has no videos. Avatar border is dark and links to their YouTube channel page.
                 chanList.push('<div id="noVids"><a href="http://www.youtube.com/channel/' + this.subscriptions[i].channelId + '" target="_blank" title="' + this.subscriptions[i].readableName + '"><img src="' + this.subscriptions[i].avatar + '" width="80px" height="80px"/></a></div>');
             }
         }
         $(document).tooltip();
+        $('#info3').css("background-image", "url('" + this.avatar + "')");
+        $('#info3').css("background-size", "100%");
         $('#notice').remove();
         $('#progressbar').remove();
         $('#loading').remove();
         $("#info:hidden").show();
         $("#info3:hidden").show();
         $("#chanList:hidden").show();
-        $('#contentArea').show();
+        //Append user info to page.
         document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + this.newVideos + '| Total Subscriptions: ' + this.subscriptions.length + '</p></div><div id="queue"><a href="" onClick="popup(\'queue\');return false;">Queue</a></div><div id="clearCookies"><a href="/eytca/logout.html">Logout</a></div>';
-        $('#info3').css("background-image", "url('" + this.avatar + "')");
-        $('#info3').css("background-size", "100%");
         document.getElementById('chanList').innerHTML = chanList.join('');
+        //Append main content to page.
         document.getElementById('contentArea').innerHTML = html.join('');
+        $('#contentArea').show();
     };
 }
 
 function onClientLoad() {
     loading(5, "Client Loaded");
     gapi.client.load('youtube', 'v3', onYouTubeApiLoad);
+    currentTime = moment();
 }
 
 function onYouTubeApiLoad() {
     loading(10, "API Loaded");
     gapi.client.setApiKey('AIzaSyAovj5X_gBnFTX2uJkGwYabTOX5pPGqJQE');
+    //User object creation.
     currentUser = new User();
     currentUser.getInfo();
 }

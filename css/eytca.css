@@ -44,6 +44,10 @@ h1 {
     color: #72AECF;
 }
 
+.title h1 a {
+    font-size: 30px;
+}
+
 .videoInfo p {
     color: #8DBCD6;
 }
@@ -99,7 +103,7 @@ form {
     display: inline;
     background: #232C31;
     font-weight: 700;
-    color: #fff;
+    border: 2px solid #4B5E69;
     border-radius: 5px;
     text-align: center;
     margin: 10px;
@@ -112,17 +116,22 @@ form {
     padding: 5px;
     border-radius: 5px;
     font-family: Cambria, Georgia, serif;
-    background: rgba(35,44,49,.7);
+    background: rgba(2,22,22,.7);
     text-align: center;
 }
 
-#button:hover,#button2:hover,#button3:hover,#button4:hover,#clearCookies:hover,#after:hover,#loadingLogout:hover,#queue:hover {
+#button:hover,#button2:hover,#button3:hover,#button4:hover,#after:hover,#loadingLogout:hover {
     background: #506570;
+}
+
+#clearCookies:hover, #queue:hover {
+    background: rgb(2,22,22);
 }
 
 #clearCookies,#queue {
     margin-top: 15px;
     display: block;
+    background: rgba(2,22,22,.7);
 }
 
 .intro p, tr {
@@ -214,11 +223,11 @@ form {
     margin: 10px;
     max-width: 355px;
     float: left;
-    border: 2px dotted #4B5E69;
+    border: 2px solid #4B5E69;
     height: 300px;
     padding: 5px;
     box-shadow: 8px 8px 20px #232C31;
-    background-color: rgba(35,44,49,.4);
+    background-color: rgba(2,22,22,.3);
     border-radius: 10px;
 }
 
@@ -228,10 +237,10 @@ form {
     height: 300px;
     float: left;
     display: none;
-    border: 2px dotted #4B5E69;
+    border: 2px solid #4B5E69;
     padding: 5px;
     box-shadow: 8px 8px 10px #232C31;
-    background-color: rgba(35,44,49,.4);
+    background-color: rgba(2,22,22,.3);
     border-radius: 10px;
     overflow: auto;
 }
@@ -245,10 +254,10 @@ form {
     width: 760px;
     float: left;
     display: none;
-    border: 2px dotted #4B5E69;
+    border: 2px solid #4B5E69;
     padding: 5px;
     box-shadow: 8px 8px 10px #232C31;
-    background-color: rgba(35,44,49,.4);
+    background-color: rgba(2,22,22,.3);
     border-radius: 10px;
     height: 300px;
     overflow: auto;
@@ -274,15 +283,19 @@ form {
 }
 
 #infoHome {
-    display: none;
     border: 2px dotted #4B5E69;
     padding: 20px;
     box-shadow: 8px 8px 20px #232C31;
-    background-color: rgba(35,44,49,.4);
+    background-color: rgba(2,22,22,.3);
     border-radius: 10px;
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
+}
+
+iframe {
+    box-shadow: 8px 8px 10px #232C31;
+    margin-bottom: 8px;
 }
 
 div#bar {
@@ -299,20 +312,20 @@ li img{
 #video {
     float: left;
     display: inline;
-    border: 2px solid #4B5E69;
+    border: 2px dotted #4B5E69;
+    border-radius: 10px;
     height: 150px;
     width: 600px;
     padding: 5px;
     margin-top: 10px;
     margin-left: 10px;
     box-shadow: 8px 8px 20px #232C31;
-    background-color: rgba(35,44,49,.4);
-    border-radius: 10px;
+    background-color: rgba(2,22,22,.3);
     overflow-y: hidden;
     overflow-x: hidden;
 }
 #video:hover {
-    background-color: rgba(35,44,49,1);
+    background-color: rgb(2,22,22);
 }
 
 #videoEmbed {
@@ -322,6 +335,7 @@ li img{
 #video img {
     display: block;
     float:left;
+    border: 2px solid #4B5E69;
 }
 
 .videoInfo {
@@ -332,13 +346,17 @@ li img{
     max-height:170px;
 }
 
+a:hover,.title:hover {
+    color: #8CD6FF;
+}
+
 #chanTitle {
     margin-top: 50px;
     width: 99%;
     float: left;
 	padding: 5px;
     box-shadow: 8px 8px 20px #232C31;
-	background: rgba(35,44,49,.4);
+	background: rgba(2,22,22,.3);
 	border: 2px solid #4B5E69;
 	border-radius: 10px;
 }
@@ -353,7 +371,7 @@ li img{
 }
 
 #chanTitle p a {
-    margin-left: 20px;
+    margin-left: 32px;
 }
 
 #holder {
@@ -369,9 +387,9 @@ img {
     margin: 5px;
 }
 
-#header {
+/*#header {
     border-top: 44px dotted #4B5E69;
-}
+}*/
 
 .ui-tooltip{padding:8px;position:absolute;z-index:9999;max-width:300px;-webkit-box-shadow:0 0 5px #aaa;box-shadow:0 0 5px #aaa;}
 body .ui-tooltip{border-width:2px;}

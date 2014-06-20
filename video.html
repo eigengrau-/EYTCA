@@ -11,15 +11,32 @@
     <title>Eigengrau's YouTube Channel Aggregator</title>
 
     <script>
-	$(document).ready(function(){
+    function replaceVideo(video) {
+        vid = video.slice(0,12);
+        document.getElementById('vid').innerHTML = '<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + vid + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><p><a href="http://www.youtube.com/watch?v=' + vid + '">View on YouTube</a></div>';
+    }
+    $(document).ready(function(){
         if ($.cookie("videoPopup")) {
-            var videoMod = $.cookie("videoPopup").slice(0,12);
-            document.getElementById('vid').innerHTML = '<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + videoMod + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><p><a href="http://www.youtube.com/watch?v=' + videoMod + '">View on YouTube</a></div>';
+            var videoMod = $.cookie("videoPopup").split(",");
+            document.getElementById('vid').innerHTML = '<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + videoMod[0] + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1>' + videoMod[1] + ' hours ago | ' + videoMod[2] + ' Views | &uarr; ' + videoMod[3] + ', &darr; ' + videoMod[4] + ' | <a href="http://www.youtube.com/watch?v=' + videoMod[0] + '">View on YouTube</a></h1></div>';
         }
         if ($.cookie("currentQueue")) {
-            document.getElementById('contentArea').innerHTML = '<p>Queue: ' + $.cookie("currentQueue");
-            $('#contentArea').show();
+            var queue;
+            var user = $.cookie("currentQueue");
+            $.get( "queueGet.php", { username: user } )
+                .done(function( data ) {
+                    if (data) {
+                        queue = JSON.parse(data);
+                        for (i = 0; i < queue.length; i++) {
+                            queueHtml += '<div id="video"><a href="" id="vid" onClick="replaceVideo(\'' + queue[i][1] + '\');return false;"><img src="https://i.ytimg.com/vi/' + queue[i][1] + '/mqdefault.jpg" width="235px"/><span class="videoInfo"><span class="title">' + queue[i][0] + '</span></a><p>' + queue[i][3] + ' hours ago<p><span class="desc">' + queue[i][2] + '</span></span></div>';
+                        }
+                        document.getElementById('contentArea').innerHTML = '<p>Queue: ' + queueHtml;
+                        $('#contentArea').show();
+                    }
+                });
         }
+        videoMod = "";
+        $.removeCookie("videoPopup", { path: '/eytca/video.html' });
     });
     </script>
 
