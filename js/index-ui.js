@@ -1,9 +1,11 @@
 function bakeCookies() {
     $.cookie("user", enteredUserName, {
-        path: "/eytca/"
+        path: "/eytca/",
+        expires: 365
     });
     $.cookie("days", enteredDaysToDisplay, {
-        path: "/eytca/"
+        path: "/eytca/",
+        expires: 365
     });
     $(location).attr("href", "eytca.html");
 }

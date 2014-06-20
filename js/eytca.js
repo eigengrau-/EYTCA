@@ -181,7 +181,7 @@ function Channel(readableName, channelId, avatar) {
         var i, currentTime, published;
         for (i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
-            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">' + this.videos[i].title + '</span></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \'' + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].date + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
+            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">' + this.videos[i].title + '</span></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \'' + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].date + '\', \'' + this.videos[i].duration + '\', \'' + this.videos[i].views + '\', \'' + this.videos[i].likes + '\', \'' + this.videos[i].dislikes + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
         }
     };
 }
@@ -283,7 +283,6 @@ function onSearchResponse(response) {
 
 //Video viewer window.
 function popup(vid) {
-    //queueAjax("get");
     if (vid !== "queue") {
         $.removeCookie("videoPopup", { path: '/eytca/video.html' });
         $.cookie('videoPopup', vid, {
@@ -292,42 +291,8 @@ function popup(vid) {
     } else {
         $.removeCookie("videoPopup", { path: '/eytca/video.html' });
     }
-    if (currentUser.queue.length > 0) {
-        $.cookie("currentQueue", currentUser.userId, {
-            path: "/eytca/video.html"
-        });
-    }
     window.open("/eytca/video.html", "fullscreen=yes, scrollbars=auto");
 }
-
-//WIP video queue.
-/*function queueAjax(updateGet) {
-    if (updateGet === "update") {
-        //Add video to queue
-        $.ajax({
-            type: "POST",
-            url: "queue.php",
-            dataType: "text json",
-            data: { username: currentUser.userId, queue: JSON.stringify(currentUser.queue)}
-        })
-            .done(function( msg ) {
-                //Update userobj.queue
-                $.get( "queueGet.php", { username: currentUser.userId } )
-                    .done(function( data ) {
-                        if (data) {
-                            currentUser.queue = JSON.parse(data);
-                        }
-                    });
-            });
-    } else {
-        $.get( "queueGet.php", { username: currentUser.userId } )
-        .done(function( data ) {
-            if (data) {
-                currentUser.queue = JSON.parse(data);
-            }
-        });
-    }
-    }*/
 
 //User Object
 function User() {
@@ -356,18 +321,20 @@ function User() {
         loading(45, "Requesting user subscriptions list.");
         apiRequest('GetSubscriptions');
     };
-    this.addToQueue = function(title, id, desc, date) {
-        this.queue.push([title, id, desc, date]);
-        //queueAjax("update");
+    this.addToQueue = function(title, id, desc, date, duration, views, likes, dislikes) {
+        this.queue.push([title, id, desc, date, duration, views, likes, dislikes]);
+        $.removeCookie("queue", {
+            path: "/eytca/"
+         });
+        $.cookie("queue", JSON.stringify(this.queue), {
+            path: "/eytca/",
+            expires: 365
+        });
     };
     this.displayQueue = function() {
         popup("queue");
     };
     this.display = function() {
-        $.removeCookie("currentQueue", {
-            path: "/eytca/"
-         });
-        //queueAjax("get");
         for (var i = 0; i < this.subscriptions.length; i++) {
             if (this.subscriptions[i].videos.length > 0) {
                 this.subscriptions[i].display();
@@ -386,7 +353,7 @@ function User() {
         $("#info3:hidden").show();
         $("#chanList:hidden").show();
         //Append user info to page.
-        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + this.newVideos + '| Total Subscriptions: ' + this.subscriptions.length + '</p></div><div id="queue"><a href="" onClick="popup(\'queue\');return false;">Queue</a></div><div id="clearCookies"><a href="/eytca/logout.html">Logout</a></div>';
+        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + this.newVideos + '| Total Subscriptions: ' + this.subscriptions.length + '</p></div><div id="clearCookies"><a href="" onClick="logout();return false;">Logout</a></div>';
         document.getElementById('chanList').innerHTML = chanList.join('');
         //Append main content to page.
         document.getElementById('contentArea').innerHTML = html.join('');
