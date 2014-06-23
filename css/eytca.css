@@ -224,11 +224,19 @@ form {
     max-width: 355px;
     float: left;
     border: 2px solid #4B5E69;
+    border-radius: 10px;
     height: 300px;
     padding: 5px;
     box-shadow: 8px 8px 20px #232C31;
-    background-color: rgba(2,22,22,.3);
-    border-radius: 10px;
+    /*background-color: rgba(2,22,22,.3);*/
+background: rgba(75,94,105,0.45);
+background: -moz-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(75,94,105,0.45)), color-stop(100%, rgba(48,54,56,0.3)));
+background: -webkit-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: -o-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: -ms-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: linear-gradient(to bottom, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4b5e69', endColorstr='#303638', GradientType=0 );
 }
 
 #info3 {
@@ -286,11 +294,19 @@ form {
     border: 2px dotted #4B5E69;
     padding: 20px;
     box-shadow: 8px 8px 20px #232C31;
-    background-color: rgba(2,22,22,.3);
+    /*background-color: rgba(2,22,22,.3);*/
     border-radius: 10px;
     max-width: 700px;
     margin-left: auto;
     margin-right: auto;
+background: rgba(75,94,105,0.45);
+background: -moz-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(75,94,105,0.45)), color-stop(100%, rgba(48,54,56,0.3)));
+background: -webkit-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: -o-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: -ms-linear-gradient(top, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+background: linear-gradient(to bottom, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4b5e69', endColorstr='#303638', GradientType=0 );
 }
 
 iframe {
@@ -354,11 +370,11 @@ a:hover,.title:hover {
     margin-top: 50px;
     width: 99%;
     float: left;
-	padding: 5px;
+    padding: 5px;
     box-shadow: 8px 8px 20px #232C31;
-	background: rgba(2,22,22,.3);
-	border: 2px solid #4B5E69;
-	border-radius: 10px;
+    background: rgba(2,22,22,.3);
+    border: 2px solid #4B5E69;
+    border-radius: 10px;
 }
 
 #chanTitle img {

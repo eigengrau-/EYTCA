@@ -17,9 +17,6 @@
     }
     function removeFromQueue(video) {
         queue.splice(video, 1);
-        $.removeCookie("queue", {
-            path: "/eytca/"
-         });
         $.cookie("queue", JSON.stringify(this.queue), {
             path: "/eytca/",
             expires: 365
@@ -29,6 +26,7 @@
     $(document).ready(function(){
         if ($.cookie("videoPopup")) {
             var videoMod = $.cookie("videoPopup").split(",");
+            document.title = "EYTCA: " + videoMod[5];
             document.getElementById('vid').innerHTML = '<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + videoMod[0] + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1>' + videoMod[1] + ' hours ago | ' + videoMod[2] + ' Views | &uarr; ' + videoMod[3] + ', &darr; ' + videoMod[4] + ' | <a href="http://www.youtube.com/watch?v=' + videoMod[0] + '" target="_blank">View on YouTube</a></h1></div>';
         }
         if ($.cookie("queue")) {
