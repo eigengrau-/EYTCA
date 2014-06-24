@@ -26,84 +26,7 @@ function catchExceptions() {
         }
     }
     if (typeof result.error !== "undefined") {
-        var errReason = result.error.data[0].reason;
-        switch (errReason) {
-        case "accountClosed":
-            errMsg = "Subscriptions could not be retrieved because the subscriber's account is closed.";
-            break;
-        case "accountSuspended":
-            errMsg = "Subscriptions could not be retrieved because the subscriber's account is suspended.";
-            break;
-        case "subscriptionForbidden":
-            errMsg = "The requester is not allowed to access the requested subscriptions.";
-            break;
-        case "subscriberNotFound":
-            errMsg = "The subscriber identified with the request cannot be found.";
-            break;
-        case "invalidSearchFilter":
-            errMsg = "The request contains an invalid combination of search filters and/or restrictions.";
-            break;
-        case "invalidVideoId":
-            errMsg = "The relatedToVideo parameter specified an invalid video ID.";
-            break;
-        case "forbidden":
-            errMsg = "Access forbidden. The request may not be properly authorized.";
-            break;
-        case "quotaExceeded":
-            errMsg = "The request cannot be completed because you have exceeded your quota.";
-            break;
-        case "incompatibleParameters":
-            errMsg = "The request specifies two or more parameters that cannot be used in the same request.";
-            break;
-        case "invalidFilters":
-            errMsg = "The request specifies an invalid filter parameter.";
-            break;
-        case "invalidPageToken":
-            errMsg = "The request specifies an invalid page token.";
-            break;
-        case "missingRequiredParameter":
-            errMsg = "The request is missing a required parameter.";
-            break;
-        case "unexpectedParameter":
-            errMsg = "The request specifies an unexpected parameter.";
-            break;
-        case "accountDelegationForbidden":
-            errMsg = "The authenticated user cannot act on behalf of the specified Google account.";
-            break;
-        case "authenticatedUserAccountClosed":
-            errMsg = "The YouTube account of the authenticated user is closed. In case the authenticated user is acting on behalf of another Google account, then this error refers to the latter.";
-            break;
-        case "authenticatedUserAccountSuspended":
-            errMsg = "The YouTube account of the authenticated user is suspended. In case the authenticated user is acting on behalf of another Google account, then this error refers to the latter.";
-            break;
-        case "authenticatedUserNotChannel":
-            errMsg = "For this request the authenticated user must resolve to a channel, but does not. If your request is authenticated and uses the onBehalfOfContentOwner delegation parameter, then you should also set the onBehalfOfContentOwnerChannel parameter.";
-            break;
-        case "channelClosed":
-            errMsg = "The channel identified in the request has been closed.";
-            break;
-        case "channelNotFound":
-            errMsg = "The channel identified in the request cannot be found.";
-            break;
-        case "channelSuspended":
-            errMsg = "The channel identified in the request has been suspended.";
-            break;
-        case "cmsUserAccountNotFound":
-            errMsg = "The CMS user is not allowed to act on behalf of the specified content owner.";
-            break;
-        case "insufficientCapabilities":
-            errMsg = "The CMS user has insufficient capabilities.";
-            break;
-        case "insufficientPermissions":
-            errMsg = "The scopes associated with the OAuth 2.0 token provided for the request are insufficient for accessing the requested data.";
-            break;
-        case "contentOwnerAccountNotFound":
-            errMsg = "The specified content owner account was not found.";
-            break;
-        default:
-            errMsg = "Other";
-        }
-        alert('Error: ' + result.error.data[0].message + '. ' + errMsg + ' Redirecting back to the homepage.');
+        alert('Error: ' + result.error.data[0].reason + '. Redirecting back to the homepage.');
         logout();
     }
 }
@@ -167,10 +90,15 @@ function Channel(readableName, channelId, avatar) {
     });
     this.display = function() {    //Called by User Display method.
         chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' | ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
-        html.push('<div id="chanTitle" align="left"><img src="' + this.avatar + '" width="80px" height="80px"/><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank">' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><p><a href="#top">TOP &uarr;</a></div>');
+        html.push('<div id="chanTitle" align="left"><img src="' + this.avatar + '" width="80px" height="80px"/><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId
+         + '" target="_blank">' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><p><a href="#top">TOP &uarr;</a></div>');
         for (var i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
-            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">' + this.videos[i].title + '</span></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \'' + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].date + '\', \'' + this.videos[i].duration + '\', \'' + this.videos[i].views + '\', \'' + this.videos[i].likes + '\', \'' + this.videos[i].dislikes + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
+            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">'
+             + this.videos[i].title + '</span></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
+              + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].title.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].id + '\', \''
+               + this.videos[i].description.replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + '\', \'' + this.videos[i].date + '\', \'' + this.videos[i].duration + '\', \'' + this.videos[i].views + '\', \'' + this.videos[i].likes
+                + '\', \'' + this.videos[i].dislikes + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></span></div>');
         }
     };
 }
@@ -280,7 +208,8 @@ function User() {
                 this.subscriptions[i].display();
             } else {
                 //Channel has no videos. Avatar border is dark and links to their YouTube channel page.
-                chanList.push('<div id="noVids"><a href="http://www.youtube.com/channel/' + this.subscriptions[i].channelId + '" target="_blank" title="' + this.subscriptions[i].readableName + '"><img src="' + this.subscriptions[i].avatar + '" width="80px" height="80px"/></a></div>');
+                chanList.push('<div id="noVids"><a href="http://www.youtube.com/channel/' + this.subscriptions[i].channelId + '" target="_blank" title="' + this.subscriptions[i].readableName + '"><img src="' + this.subscriptions[i].avatar
+                 + '" width="80px" height="80px"/></a></div>');
             }
         }
         $(document).tooltip();
@@ -291,7 +220,8 @@ function User() {
         $("#info3:hidden").show();
         $("#chanList:hidden").show();
         //Append user info to page.
-        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + this.newVideos + '| Total Subscriptions: ' + this.totalSubs + '</p></div><div id="clearCookies"><a href="" onClick="logout();return false;">Logout</a></div>';
+        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><a href="http://www.youtube.com/channel/' + this.userId + '" target="_blank">' + this.readableName + '</a><p>Total Videos: ' + this.newVideos
+         + '| Total Subscriptions: ' + this.totalSubs + '</p></div><div id="clearCookies"><a href="" onClick="logout();return false;">Logout</a></div>';
         document.getElementById('chanList').innerHTML = chanList.join('');
         //Append main content to page.
         document.getElementById('contentArea').innerHTML = html.join('');
