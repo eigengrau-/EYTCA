@@ -85,8 +85,8 @@ function Channel(readableName, channelId, avatar) {
     });
     this.display = function() {    //Called by User Display method.
         chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' | ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
-        html.push('<div id="chanTitle" align="left"><img src="' + this.avatar + '" width="80px" height="80px"/><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId
-         + '" target="_blank">' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><p><a href="#top">TOP &uarr;</a></div>');
+        html.push('<div id="chanTitle" align="center"><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId
+         + '" target="_blank"><img src="' + this.avatar + '" width="80px" height="80px"/>' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><a href="#top"> &bull; TOP &uarr;</a></div>');
         for (var i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
             html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><img src="' + this.videos[i].thumbnail + '" width="235px"/><span class="videoInfo"><span class="title">'
@@ -177,7 +177,8 @@ function User() {
             loading(70, 'Response recieved');
             _this.currentPage++;
             if (result.error) {errorHandling();}
-            if (result.pageInfo.totalResults === 0) {
+            console.log(result);
+            if (result.items === 0) {
                 alert("Subscriptions not found.");
                 logout();
             }
