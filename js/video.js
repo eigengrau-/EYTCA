@@ -23,8 +23,8 @@ $(document).ready(function(){
         queue = JSON.parse($.cookie("queue"));
         queueHtml = "";
         for (var i = 0; i < queue.length; i++) {
-            queueHtml += '<div id="video"><a href="" id="vid" onClick="replaceVideo(\'' + [i] + '\');return false;"><img src="https://i.ytimg.com/vi/' + queue[i][0] + '/mqdefault.jpg" width="235px"/><span class="videoInfo"><span class="title">'
-             + queue[i][5] + '</span></a><p>' + queue[i][1] + ' hours ago | ' + queue[i][7] + ' | ' + queue[i][2] + ' Views | &uarr; ' + queue[i][3] + ', &darr; ' + queue[i][4] + '<br /><a href="#" onClick="removeFromQueue('
+            queueHtml += '<div id="video"><a href="" id="vid" onClick="replaceVideo(\'' + [i] + '\');return false;"><span class="videoInfo"><span class="title">'
+             + queue[i][5] + '</span><br /><img src="https://i.ytimg.com/vi/' + queue[i][0] + '/mqdefault.jpg" width="320px"/></a><p>' + queue[i][1] + ' hours ago | ' + queue[i][7] + ' | ' + queue[i][2] + ' Views | &uarr; ' + queue[i][3] + ', &darr; ' + queue[i][4] + '<br /><a href="#" onClick="removeFromQueue('
               + [i] + ')">Remove</a><p><span class="desc">' + queue[i][6] + '</span></span></div>';
             if (i === queue.length-1) {
                 document.getElementById('contentArea').innerHTML = queueHtml;
