@@ -27,17 +27,23 @@ function errorHandling() {
     }
 }
 
+RegExp.escape = function(str) {
+    return str.replace(/[,]/g, '').replace(/[-\/\\^$*+?".'#@()|[\]{}]/g, '\\$&');
+};
+
 //Object constructor for individual videos.
-function Video(title, id, description, thumbnail, date) {
+function Video(title, id, description, thumbnail, date, owner, ownerId) {
     this.title = title;
     this.id = id;
     this.description = description;
     this.thumbnail = thumbnail;
     this.date = currentTime.diff(moment(date), "hours");
+    this.owner = owner;
+    this.ownerId = ownerId;
     var _this = this;
     this.infoArr = function() {    //Called when added to page for video popup info.
-        return _this.id + ',' +  _this.date + ',' +  _this.views + ',' +  _this.likes + ',' +  _this.dislikes + ',' + _this.title.replace(/,/g, "").replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + ','
-         + _this.description.replace(/,/g, "").replace(/[^\w\s]|_/g, "").replace(/\s+/g, " ") + ',' + _this.duration;
+        return _this.id + ',' + _this.date + ',' + _this.views + ',' + _this.likes + ',' + _this.dislikes + ',' + RegExp.escape(_this.title) + ',' + RegExp.escape(_this.description) + ',' + _this.duration + ',' + RegExp.escape(_this.owner)
+         + ',' + _this.ownerId;
     };
     //The following properties are added on creation: Duration, views, likes, dislikes.
 }
@@ -62,7 +68,7 @@ function Channel(readableName, channelId, avatar) {
             if (result.items && result.pageInfo && result.pageInfo.totalResults > 0) {
                 for (var k = 0; k < result.items.length; k++) {
                     tempVideoIds[k] = result.items[k].id.videoId;
-                    _this.videos[k] = new Video(result.items[k].snippet.title, result.items[k].id.videoId, result.items[k].snippet.description, result.items[k].snippet.thumbnails.medium.url, result.items[k].snippet.publishedAt);
+                    _this.videos[k] = new Video(result.items[k].snippet.title, result.items[k].id.videoId, result.items[k].snippet.description, result.items[k].snippet.thumbnails.medium.url, result.items[k].snippet.publishedAt, _this.readableName, _this.channelId);
                     if (k === result.items.length - 1) {
                         callback();
                     }
@@ -88,13 +94,14 @@ function Channel(readableName, channelId, avatar) {
         });
     });
     this.display = function() {    //Called by User Display method.
-        chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' | ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
-        html.push('<div id="chanTitle" align="center"><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId
-         + '" target="_blank"><img src="' + this.avatar + '" width="80px" height="80px"/>' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since ' + now.format('MMMM Do YYYY, h:mm:ss a') + '</h1></span><br /><a href="#top">&uarr; TOP &uarr;</a></div>');
+        chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' &bull; ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
+        html.push('<div id="chanTitle" align="center"><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank"><img src="' + this.avatar
+         + '" width="80px" height="80px"/>' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since '+ now.format('MMMM Do YYYY, h:mm:ss a')
+          + '</h1></span><br /><a href="#top">&uarr; TOP &uarr;</a></div>');
         for (var i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
-            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><span class="title">'
-             + this.videos[i].title + '</span><br /><img src="' + this.videos[i].thumbnail + '" width="320px"/></a><p>' + this.videos[i].date + ' hours ago | ' + this.videos[i].duration + ' | ' + this.videos[i].views + ' Views | &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
+            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><span class="title">' + this.videos[i].title + '</span><br /><img src="' + this.videos[i].thumbnail
+             + '" width="295px"/></a><p>' + this.videos[i].date + ' hours ago &bull; ' + this.videos[i].duration + ' &bull; ' + this.videos[i].views + ' Views &bull; &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
               + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].infoArr() + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></div>');
         }
     };
