@@ -181,12 +181,12 @@ iframe {
 }
 
 #info, #info3 {
-    margin: 0.7564296520423601%;
-    width: 27.853253%%;
+    margin: 0 0.7564296520423601% 0 0.7564296520423601%;
+    width: 27.853253%;
     height: 300px;
     float: left;
     display: none;
-    padding: .37821482602118006% 0 0 0.37821482602118006%;
+    padding: 0.37821482602118006% 0 0 0.37821482602118006%;
     background-color: rgba(2,22,22,.3);
     border-radius: 10px;
     overflow: auto;
@@ -197,28 +197,34 @@ iframe {
 }
 
 #chanList {
-    margin: 0.7564296520423601%;
-    width: 38.57791225416036%;
+    width: 38.577912%;
+    margin: 0 0 0 0.7564296520423601%;
+    height: 300px;
     float: left;
     display: none;
-    padding: .37821482602118006% 0 0 0.37821482602118006%;
+    padding: 0.37821482602118006% 0 0 0.37821482602118006%;
+    background-color: rgba(2,22,22,.3);
     border-radius: 10px;
-    height: 300px;
+    overflow: auto;
     overflow: auto;
 }
 
-#chanList a img{
-    margin: 2px;
+#chan a img{
     border: 5px solid #4A93BD;
+    margin: 0 4px 8px 0;
 }
 
 #noVids a img {
-    border: 5px solid #4B5E69 !important;
-    margin: 2px;
+    border: 5px solid #4B5E69;
+    margin: 0 4px 8px 0;
 }
 
 #noVids, #chan {
+    opacity: 0.8;
     display: inline;
+}
+#chan:hover, #noVids:hover {
+    opacity: 1.0;
 }
 
 #infoHome {
@@ -351,26 +357,31 @@ a:hover,.title:hover {
     margin-left: 32px;
 }
 
+.arrow:after {
+    background: #506570;
+    border: 2px solid white;
+}
+
 .ui-tooltip {
+    background: #323739;
     padding:8px;
     position:absolute;
     z-index:9999;
     max-width:300px;
-}
-body .ui-tooltip {
-    border-width:2px;
-}
-.ui-tooltip, .arrow:after {
-    background: #506570;
-    border: 2px solid white;
-  }
-  .ui-tooltip {
-    border: 2px dotted #4B5E69;
     border-radius: 10px;
     color: #72AECF;
     font-family: Cambria, Georgia, serif;
     margin: 2px;
-  }
+    background: rgba(78,94,105,1);
+    background: -moz-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
+    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(78,94,105,1)), color-stop(100%, rgba(48,54,56,1)));
+    background: -webkit-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
+    background: -o-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
+    background: -ms-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
+    background: linear-gradient(to bottom, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4e5e69', endColorstr='#303638', GradientType=0 );
+}
+
 #progressbar .ui-progressbar-value {
     background:url("images/animated-overlay.gif");
 }
