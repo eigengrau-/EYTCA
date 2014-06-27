@@ -93,10 +93,10 @@ iframe {
 }
 
 .infoTitle p, .videoHeader {
-    font-size: 4em;
+    font-size: 3.3em;
     font-weight: 900;
     margin: 0;
-    line-height: 50px;
+    line-height: 80%;
     text-shadow: 4px 4px 30px #000;
     color: #72AECF
 }
@@ -166,9 +166,9 @@ iframe {
 }
 
 .infoTitle h4 {
-    font-size: 25px;
+    font-size: 2em;
     font-weight: lighter;
-    margin-top: 15px;
+    margin-top: 3%;
 }
 
 .infoTitle h4 a {
@@ -176,7 +176,8 @@ iframe {
 }
 
 #container {
-    max-width: 1322px;
+    /*max-width: 1322px;*/
+    width: 68.85416666666667%;
     margin: 0 auto;
     overflow: hidden;
     padding-bottom: 20px;
@@ -188,13 +189,13 @@ iframe {
 #info, #info3 {
     margin: 0 0.7564296520423601% 0 0.7564296520423601%;
     width: 27.853253%;
-    height: 300px;
+    height: 32%;
     float: left;
     display: none;
     padding: 0.37821482602118006% 0 0 0.37821482602118006%;
     background-color: rgba(2,22,22,.3);
     border-radius: 10px;
-    overflow: auto;
+    overflow: hidden;
 }
 #info3 p img {
     margin-top: 50px;
@@ -202,26 +203,29 @@ iframe {
 }
 
 #chanList {
-    width: 38.577912%;
+    width: 38.9%;
     margin: 0 0 0 0.7564296520423601%;
-    height: 300px;
+    height: 32%;
     float: left;
     display: none;
     padding: 0.37821482602118006% 0 0 0.37821482602118006%;
     background-color: rgba(2,22,22,.3);
     border-radius: 10px;
     overflow: auto;
-    overflow: auto;
 }
 
 #chan a img{
     border: 5px solid #4A93BD;
     margin: 0 4px 8px 0;
+    width: 21%;
+    height: 35%;
 }
 
 #noVids a img {
     border: 5px solid #4B5E69;
     margin: 0 4px 8px 0;
+    width: 21%;
+    height: 35%;
 }
 
 #noVids, #chan {
@@ -298,12 +302,14 @@ iframe {
     display: none;
 }*/
 
-#video, .video {
+#video, .video, .videoPlaylist {
     float: left;
     display: inline;
     border-radius: 10px;
-    height: 375px;
-    width: 23.4%;
+    /*height: 375px;*/
+    height: 40%;
+    width: 23%;
+    /*width: 312px;*/
     padding: 0.37821482602118006%;
     margin: 0.75643% 0 0 0.75643%;
     background-color: rgb(30,34,37);
@@ -320,14 +326,15 @@ iframe {
     display: inline-block;
 }
 
-#video:hover, .video:hover {
+#video:hover, .video:hover, .videoPlaylist {
     background-color: rgb(26,30,32);
 }
 
-#video img, .video img {
+#video img, .video img, .videoPlaylist img {
     display: inline-block;
     border: 2px solid #4B5E69;
     margin: 5px;
+    width: 95%;
 }
 
 .videoInfo {
@@ -395,10 +402,10 @@ a:hover,.title:hover {
     padding:8px;
     position:absolute;
     z-index:9999;
-    max-width:300px;
+    /*max-width:300px;*/
     border-radius: 10px;
     color: #72AECF;
-    font-family: Cambria, Georgia, serif;
+    font-family: Cambria, Georgia, serif !important;
     margin: 2px;
     background: rgba(78,94,105,1);
     background: -moz-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
@@ -415,6 +422,7 @@ a:hover,.title:hover {
 }
 
 .ui-progressbar {
+    font-family: Cambria, Georgia, serif !important;
     position: relative;
 }
 
@@ -434,6 +442,7 @@ a:hover,.title:hover {
     height:2em;
     text-align:left;
     overflow:hidden;
+    border: none !important;
 }
 .ui-progressbar .ui-progressbar-value {
     margin:-1px;
@@ -449,16 +458,19 @@ a:hover,.title:hover {
 }
 
 .ui-dialog {
-    width: 1322px !important;
+    width: 68.85416666666667% !important;
+    /*width: auto !important;*/
     display: inline-block;
     padding: 10px;
-    -webkit-box-shadow: 0px 10px 50px #72AECF;
-    box-shadow: 0px 10px 50px #72AECF;
+    -webkit-box-shadow: 0px 0px 50px #000000;
+    box-shadow: 0px 0px 50px #000000;
     text-align:center;
 }
 
 .ui-widget {
-    font-family: Segoe UI,Arial,sans-serif;
+    color: #8FA9B8;
+    font-family: Cambria, Georgia, serif;
+    margin: 2px;
     font-size: 1.1em;
 }
 .ui-widget .ui-widget {
@@ -468,11 +480,13 @@ a:hover,.title:hover {
 .ui-widget select,
 .ui-widget textarea,
 .ui-widget button {
-    font-family: Segoe UI,Arial,sans-serif;
+    color: #8FA9B8;
+    font-family: Cambria, Georgia, serif;
+    margin: 2px;
     font-size: 1em;
 }
 .ui-widget-content {
-    border: 1px solid #666666;
+    /*border: 1px solid #666666;*/
     background: #323739 url(images/default-tile.png) 50% 50% repeat;
     color: #8FA9B8;
 }
