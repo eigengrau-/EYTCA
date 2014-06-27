@@ -1,4 +1,4 @@
-var queueHtml, now, enteredUserName, enteredDaysToDisplay, currentUser, errMsg, nextPage, totalPages, totalResults, requestType, totalSubs, responseString, result, checkTick, moment, gapi, currentTime;
+var queueHtml, playlistHtml, now, enteredUserName, enteredDaysToDisplay, currentUser, errMsg, nextPage, totalPages, totalResults, requestType, totalSubs, responseString, result, checkTick, moment, gapi, currentTime;
 var html = [];
 var chanList = [];
 
@@ -27,10 +27,6 @@ function errorHandling() {
     }
 }
 
-RegExp.escape = function(str) {
-    return str.replace(/[,]/g, '').replace(/[-\/\\^$*+?".'#@()|[\]{}]/g, '\\$&');
-};
-
 //Object constructor for individual videos.
 function Video(title, id, description, thumbnail, date, owner, ownerId) {
     this.title = title;
@@ -41,12 +37,19 @@ function Video(title, id, description, thumbnail, date, owner, ownerId) {
     this.owner = owner;
     this.ownerId = ownerId;
     var _this = this;
-    this.infoArr = function() {    //Called when added to page for video popup info.
-        return _this.id + ',' + _this.date + ',' + _this.views + ',' + _this.likes + ',' + _this.dislikes + ',' + RegExp.escape(_this.title) + ',' + RegExp.escape(_this.description) + ',' + _this.duration + ',' + RegExp.escape(_this.owner)
-         + ',' + _this.ownerId;
-    };
     //The following properties are added on creation: Duration, views, likes, dislikes.
 }
+
+function Playlist(title, id, description, thumbnail, owner, ownerId) {
+    this.title = title;
+    this.id = id;
+    this.url = "http://www.youtube.com/embed/videoseries?list=" + this.id;
+    this.description = description;
+    this.thumbnail = thumbnail;
+    this.owner = owner;
+    this.ownerId = ownerId;
+}
+
 //Object constructor for individual channels.
 function Channel(readableName, channelId, avatar) {
     var tempVideoIds = [];      //Temp array of video ids for requesting their info.
@@ -54,6 +57,7 @@ function Channel(readableName, channelId, avatar) {
     this.readableName = readableName;
     this.channelId = channelId;
     this.avatar = avatar;
+    this.playlists = [];
     var _this = this;
     this.getVideos = function(callback) {    //Gets each channel's videos. Called on creation of object.
         var request = gapi.client.youtube.search.list({
@@ -80,7 +84,7 @@ function Channel(readableName, channelId, avatar) {
         var request = gapi.client.youtube.videos.list({
             part: 'contentDetails, statistics',
             id: tempVideoIds.join(),    //Requests info of all videos simultaneously.
-            maxResults: 50,
+            maxResults: 50
         });
         request.execute(function(result) {
             if (result.items) {
@@ -93,27 +97,130 @@ function Channel(readableName, channelId, avatar) {
             }
         });
     });
-    this.display = function() {    //Called by User Display method.
+    this.display = function(key) {    //Called by User Display method.
         chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' &bull; ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
-        html.push('<div id="chanTitle" align="center"><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank"><img src="' + this.avatar
+        html.push('<div id="chan' + this.channelId + '" class="chanTitle" align="center"><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank"><img src="' + this.avatar
          + '" width="80px" height="80px"/>' + this.readableName + '</a></a> has posted <a name="numResults">' + this.videos.length + '</a> new video(s) since '+ now.format('MMMM Do YYYY, h:mm:ss a')
-          + '</h1></span><br /><a href="#top">&uarr; TOP &uarr;</a></div>');
+          + '</h1> &bull; <a href="#" id="vid" onClick="popup(\'playlists\', \''+ key + '\', \''+ this.channelId + '\');return false;">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></div>');
         for (var i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
-            html.push('<div id="video"><a href="#" id="vid" onClick="popup(\'' + this.videos[i].infoArr() + '\');return false;"><span class="title">' + this.videos[i].title + '</span><br /><img src="' + this.videos[i].thumbnail
+            html.push('<div id="vid' + currentUser.newVideos + '" class="video"><a href="#" id="vid" onClick="popup(\'' + i + '\', \''+ key + '\', \''+ this.channelId + '\');return false;"><span class="title">' + this.videos[i].title + '</span><br /><img src="' + this.videos[i].thumbnail
              + '" width="295px"/></a><p>' + this.videos[i].date + ' hours ago &bull; ' + this.videos[i].duration + ' &bull; ' + this.videos[i].views + ' Views &bull; &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
-              + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + this.videos[i].infoArr() + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></div>');
+              + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + i + '\', \''+ key + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></div>');
+        }
+    };
+    this.getPlaylists = function(callback) {
+        if (_this.playlists.length === 0) {
+            var request = gapi.client.youtube.playlists.list({
+                part: 'snippet',
+                maxResults: 50,
+                channelId: _this.channelId
+            });
+            request.execute(function(result) {
+                if (result.error) { errorHandling(); }
+                if (result.items && result.pageInfo && result.pageInfo.totalResults > 0) {
+                    for (var k = 0; k < result.items.length; k++) {
+                        _this.playlists[k] = new Playlist(result.items[k].snippet.title, result.items[k].id, result.items[k].snippet.description, result.items[k].snippet.thumbnails.high.url, _this.readableName, _this.channelId);
+                        if (k === result.items.length-1) {
+                            callback();
+                        }
+                    }
+                }
+            });
+        } else {
+            callback();
         }
     };
 }
 
-//Video viewer window.
-function popup(vid) {
-    $.cookie('videoPopup', vid, {
-        path: '/eytca/video.html'
-    });
-    window.open("/eytca/video.html", "fullscreen=yes, scrollbars=auto");
+function closeDialog() {
+    $("#contentWindow").dialog("close");
 }
+//Video viewer window.
+function popup(key, chan, chanId) {
+    if (key === "playlists") {
+        playlistHtml = '<div id="removeDialog" class="remove" onClick="closeDialog()"><h1>Close</h1></div><br /><br /><div id="vid"></div>';
+        currentUser.subscriptions[chan].getPlaylists(function () {
+            var playlists = currentUser.subscriptions[chan].playlists;
+            for (var i = 0; i < currentUser.subscriptions[chan].playlists.length; i++) {
+                playlistHtml += '<div id="queue' + i + '" class="video"><a href="#" id="vid" onClick="currentUser.replaceVideo(' + i + ',' + chan + ', \'playlist\');return false;"><span class="videoInfo"><span class="title">'
+                 + playlists[i].title + '</span><br /><img src="' + playlists[i].thumbnail + '" width="295px"/></a><p><a href="http://www.youtube.com/channel/' + playlists[i].ownerId + '" target="_blank">' + playlists[i].owner
+                  + '</a><br /><p><span class="desc">' + playlists[i].description + '</span></span></div>';
+                if (i === currentUser.subscriptions[chan].playlists.length-1) {
+                    $("#contentWindow").dialog({
+                        resizable: false,
+                        draggable: true,
+                        position: {
+                            my: "center top",
+                            at: "center bottom",
+                            of: "#chan"+chanId
+                        },
+                        open: function() {
+                            document.getElementById("contentWindow").innerHTML = playlistHtml;
+                        },
+                        autoOpen: true
+                    });
+                    $("#contentWindow").css({
+                        'display' : 'inline-block',
+                        'overflow-y' : 'scroll',
+                        'height' : '870px'
+                    });
+                }
+            }
+        });
+        return;
+    }
+    var videoMod = currentUser.subscriptions[chan].videos[key];
+    queueHtml = '<div id="removeDialog" class="remove" onClick="closeDialog()"><h1>Close</h1></div><div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + videoMod.ownerId + '" target="_blank">' + videoMod.owner + '</a> &bull; ' + videoMod.date + ' hours ago &bull; ' + videoMod.duration + ' Views &bull; &uarr; ' + videoMod.likes + ', &darr; ' + videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + videoMod.id + '" target="_blank">View on YouTube</a></h1></div>';
+    if (currentUser.queue.length > 0) {
+        for (var i = 0; i < currentUser.queue.length; i++) {
+            var queue = currentUser.subscriptions[currentUser.queue[i][1]].videos[currentUser.queue[i][0]];
+            queueHtml += '<div id="queue' + i + '" class="video"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="" id="vid" onClick="currentUser.replaceVideo(' + currentUser.queue[i][0] + ',' + currentUser.queue[i][1] + ', \'video\');return false;"><span class="videoInfo"><span class="title">'
+             + queue.title + '</span><br /><img src="https://i.ytimg.com/vi/' + queue.id + '/mqdefault.jpg" width="295px"/></a><p><a href="http://www.youtube.com/channel/' + queue.ownerId + '" target="_blank">' + queue.owner
+              + '</a><br />' + queue.date + ' hours ago &bull; ' + queue.duration + ' &bull; ' + queue.views + ' Views &bull; &uarr; ' + queue.likes + ', &darr; ' + queue.dislikes + '<br /><p><span class="desc">' + queue.description + '</span></span></div>';
+            if (i === currentUser.queue.length-1) {
+                $("#contentWindow").dialog({
+                    resizable: false,
+                    draggable: true,
+                    position: {
+                        my: "center top",
+                        at: "center bottom",
+                        of: "#chan"+chanId
+                    },
+                    open: function() {
+                        document.getElementById("contentWindow").innerHTML = queueHtml;
+                    },
+                    autoOpen: true
+                });
+                $("#contentWindow").css({
+                    'display' : 'inline-block',
+                    'overflow' : 'auto',
+                    'height' : 'auto'
+                });
+            }
+        }
+    } else {
+        $("#contentWindow").dialog({
+            resizable: false,
+            draggable: true,
+            position: {
+                my: "center top",
+                at: "center bottom",
+                of: "#chan"+chanId
+            },
+            autoOpen: true,
+            open: function() {
+                document.getElementById("contentWindow").innerHTML = queueHtml;
+            }
+        });
+        $("#contentWindow").css({
+            'display' : 'inline-block',
+            'overflow' : 'auto',
+            'height' : 'auto'
+        });
+    }
+}
+
 //User Object
 function User() {
     this.nextPage;
@@ -206,28 +313,33 @@ function User() {
             }
         });
     };
-    this.addToQueue = function(infoArr) {
-        var tempArr = infoArr.split(",");
-        for (var i = 0; i < _this.queue.length; i++) {
-            if (tempArr[0] === _this.queue[i][0]) {
-                return;
-            }
-        }
-        this.queue.push(tempArr);
-        $.cookie("queue", JSON.stringify(this.queue), {
-            path: "/eytca/",
-            expires: 365
-        });
+    this.addToQueue = function(video, chan) {
+        _this.queue.push([video, chan]);
     };
+    this.removeFromQueue = function(key) {
+        _this.queue.splice(key, 1);
+        $("#queue" + key).remove();
+    };
+    this.replaceVideo = function(key, chan, type) {
+        if (type === "playlist") {
+            var videoMod = currentUser.subscriptions[chan].playlists[key];
+            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="1280" height="720" src="' + videoMod.url + '" frameborder="0" allowfullscreen></iframe><br /><h1>' + videoMod.title + ' &bull; <a href="http://www.youtube.com/channel/' + videoMod.ownerId + '" target="_blank">' + videoMod.owner + '</a> &bull; <a href="' + videoMod.url + '" target="_blank">View on YouTube</a></h1></div>');
+        } else if (type === "video"){
+            var videoMod = currentUser.subscriptions[chan].videos[key];
+            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="1280" height="720" src="//www.youtube.com/embed/' + videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + videoMod.ownerId + '" target="_blank">' + videoMod.owner + '</a> &bull; ' + videoMod.date + ' hours ago &bull; ' + videoMod.duration + ' Views &bull; &uarr; ' + videoMod.likes + ', &darr; ' + videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + videoMod.id + '" target="_blank">View on YouTube</a></h1></div>');
+        }
+}
     this.display = function() {
+        var tempChanCount = 0;
         for (var i = 0; i < this.subscriptions.length; i++) {
             if (this.subscriptions[i].videos.length > 0) {
-                this.subscriptions[i].display();
+                this.subscriptions[i].display(tempChanCount);
             } else {
                 //Channel has no videos. Avatar border is dark and links to their YouTube channel page.
                 chanList.push('<div id="noVids"><a href="http://www.youtube.com/channel/' + this.subscriptions[i].channelId + '" target="_blank" title="' + this.subscriptions[i].readableName + '"><img src="' + this.subscriptions[i].avatar
                  + '" width="80px" height="80px"/></a></div>');
             }
+            tempChanCount++;
         }
         $(document).tooltip();
         $('#info3').css("background-image", "url('" + this.avatar + "')");
