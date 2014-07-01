@@ -1,4 +1,4 @@
-var queueHtml, playlistHtml, now, enteredUserName, enteredDaysToDisplay, currentUser, errMsg, nextPage, totalPages, totalResults, requestType, totalSubs, responseString, result, checkTick, moment, gapi, currentTime;
+var popupWindow, now, enteredUserName, enteredDaysToDisplay, currentUser, errMsg, nextPage, totalPages, totalResults, requestType, totalSubs, responseString, result, checkTick, moment, gapi, currentTime;
 var html = [];
 var chanList = [];
 
@@ -37,6 +37,13 @@ function Video(title, id, description, thumbnail, date, owner, ownerId) {
     this.owner = owner;
     this.ownerId = ownerId;
     var _this = this;
+    this.trimTitle = function() {
+        if (_this.title.length > 80 ) {
+            var tempTitle = _this.title;
+            _this.title = tempTitle.slice(0, 77) + "...";
+        }
+    }
+    this.trimTitle();
     //The following properties are added on creation: Duration, views, likes, dislikes.
 }
 
@@ -101,11 +108,11 @@ function Channel(readableName, channelId, avatar) {
         var multiple = (this.videos.length > 1 ? "s" : "");
         chanList.push('<div id="chan"><a href="#' + this.channelId + '" title="' + this.readableName + ' &bull; ' + this.videos.length + '"><img src="' + this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
         html.push('<div id="chan' + this.channelId + '" class="chanTitle" align="center"><span class="title"><h1><a name="' + this.channelId + '"><a href="http://www.youtube.com/channel/' + this.channelId + '" target="_blank"><img src="' + this.avatar
-         + '" width="80px" height="80px"/>' + this.readableName + '</a></a> &bull; <a name="numResults">' + this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="#" id="vid" onClick="popup(\'playlists\', \''+ key + '\', \''+ this.channelId + '\');return false;">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></div>');
+         + '" width="80px" height="80px"/>' + this.readableName + '</a></a> &bull; <a name="numResults">' + this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="#" id="vid" onClick="popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ this.channelId + '\');return false;">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></div>');
         for (var i = 0; i < this.videos.length; i++) {
             currentUser.newVideos++;
-            html.push('<div id="vid' + currentUser.newVideos + '" class="video"><a href="#" id="vid" onClick="popup(\'' + i + '\', \''+ key + '\', \''+ this.channelId + '\');return false;"><span class="title">' + this.videos[i].title + '</span><br /><img src="' + this.videos[i].thumbnail
-             + '" width="295px"/></a><p>' + this.videos[i].date + ' hours ago &bull; ' + this.videos[i].duration + ' &bull; ' + this.videos[i].views + ' Views &bull; &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
+            html.push('<div id="vid' + currentUser.newVideos + '" class="video"><a href="#" id="vid" onClick="popupWindow = new Popup(\'' + i + '\', \''+ key + '\', \''+ this.channelId + '\');return false;"><span class="title">' + this.videos[i].title + '</span><br /><img src="' + this.videos[i].thumbnail
+             + '" /></a><p>' + this.videos[i].date + ' hours ago &bull; ' + this.videos[i].duration + ' &bull; ' + this.videos[i].views + ' Views &bull; &uarr; ' + this.videos[i].likes + ', &darr; ' + this.videos[i].dislikes
               + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + i + '\', \''+ key + '\');return false;">Add to queue</a><p><span class="desc">' + this.videos[i].description + '</span></div>');
         }
     };
@@ -133,96 +140,93 @@ function Channel(readableName, channelId, avatar) {
     };
 }
 
-function closeDialog() {
-    $("#contentWindow").dialog("close");
-}
-
-
-//Clean up plox
-function popup(key, chan, chanId) {
-    if (key === "playlists") {
-        playlistHtml = '<div id="removeDialog" class="remove" onClick="closeDialog()"><h1>Close</h1></div><br /><br /><div id="vid"></div>';
-        currentUser.subscriptions[chan].getPlaylists(function () {
-            var playlists = currentUser.subscriptions[chan].playlists;
-            for (var i = 0; i < currentUser.subscriptions[chan].playlists.length; i++) {
-                playlistHtml += '<div id="queue' + i + '" class="videoPlaylist"><a href="#" id="vid" onClick="currentUser.replaceVideo(' + i + ',' + chan + ', \'playlist\');return false;"><span class="videoInfo"><span class="title">'
-                 + playlists[i].title + '</span><br /><img src="' + playlists[i].thumbnail + '" width="295px"/></a><p><a href="http://www.youtube.com/channel/' + playlists[i].ownerId + '" target="_blank">' + playlists[i].owner
-                  + '</a><br /><p><span class="desc">' + playlists[i].description + '</span></span></div>';
-                if (i === currentUser.subscriptions[chan].playlists.length-1) {
-                    $("#contentWindow").dialog({
-                        resizable: false,
-                        draggable: true,
-                        position: {
-                            my: "center top",
-                            at: "center bottom",
-                            of: "#chan"+chanId
-                        },
-                        open: function() {
-                            document.getElementById("contentWindow").innerHTML = playlistHtml;
-                        },
-                        autoOpen: true
-                    });
-                    $("#contentWindow").css({
-                        'display' : 'inline-block',
-                        'overflow-y' : 'scroll',
-                        'height' : '870px'
-                    });
-                }
-            }
-        });
-        return;
-    }
-    var videoMod = currentUser.subscriptions[chan].videos[key];
-    queueHtml = '<div id="removeDialog" class="remove" onClick="closeDialog()"><h1>Close</h1></div><div id="vid"><iframe width="853" height="480" src="//www.youtube.com/embed/' + videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + videoMod.ownerId + '" target="_blank">' + videoMod.owner + '</a> &bull; ' + videoMod.date + ' hours ago &bull; ' + videoMod.duration + ' Views &bull; &uarr; ' + videoMod.likes + ', &darr; ' + videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + videoMod.id + '" target="_blank">View on YouTube</a></h1></div>';
-    if (currentUser.queue.length > 0) {
-        for (var i = 0; i < currentUser.queue.length; i++) {
-            var queue = currentUser.subscriptions[currentUser.queue[i][1]].videos[currentUser.queue[i][0]];
-            queueHtml += '<div id="queue' + i + '" class="video"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="" id="vid" onClick="currentUser.replaceVideo(' + currentUser.queue[i][0] + ',' + currentUser.queue[i][1] + ', \'video\');return false;"><span class="videoInfo"><span class="title">'
-             + queue.title + '</span><br /><img src="https://i.ytimg.com/vi/' + queue.id + '/mqdefault.jpg" width="295px"/></a><p><a href="http://www.youtube.com/channel/' + queue.ownerId + '" target="_blank">' + queue.owner
-              + '</a><br />' + queue.date + ' hours ago &bull; ' + queue.duration + ' &bull; ' + queue.views + ' Views &bull; &uarr; ' + queue.likes + ', &darr; ' + queue.dislikes + '<br /><p><span class="desc">' + queue.description + '</span></span></div>';
-            if (i === currentUser.queue.length-1) {
-                $("#contentWindow").dialog({
-                    resizable: false,
-                    draggable: true,
-                    position: {
-                        my: "center top",
-                        at: "center bottom",
-                        of: "#chan"+chanId
-                    },
-                    open: function() {
-                        document.getElementById("contentWindow").innerHTML = queueHtml;
-                    },
-                    autoOpen: true
-                });
-                $(".ui-dialog").css("width", "auto");
-                $("#contentWindow").css({
-                    'display' : 'inline-block',
-                    'overflow' : 'auto',
-                    'height' : 'auto'
-                });
-            }
+function Popup(key, chan, chanId) {
+    this.key = key;
+    this.chan = chan;
+    this.chanId = chanId;
+    this.playlistHtml;
+    this.queueHtml;
+    this.playlists;
+    this.videoMod;
+    this.queue;
+    var _this = this;
+    this.closeDialog = function() {
+        $("#contentWindow").dialog("destroy");
+    };
+    this.replaceVideo = function(key, chan, type) {
+        if (type === "playlist") {
+            _this.videoMod = currentUser.subscriptions[chan].playlists[key];
+            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="' + _this.videoMod.url + '" frameborder="0" allowfullscreen></iframe><br /><h1>' + _this.videoMod.title + ' &bull; <a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; <a href="' + _this.videoMod.url + '" target="_blank">View on YouTube</a></h1></div>');
+        } else if (type === "video"){
+            _this.videoMod = currentUser.subscriptions[chan].videos[key];
+            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + _this.videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; ' + _this.videoMod.date + ' hours ago &bull; ' + _this.videoMod.duration + ' Views &bull; &uarr; ' + _this.videoMod.likes + ', &darr; ' + _this.videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + _this.videoMod.id + '" target="_blank">View on YouTube</a></h1></div>');
         }
-    } else {
+    };
+    this.openWindow = function() {
         $("#contentWindow").dialog({
             resizable: false,
             draggable: true,
             position: {
                 my: "center top",
                 at: "center bottom",
-                of: "#chan"+chanId
+                of: "#chan" + chanId
             },
             autoOpen: true,
             open: function() {
-                document.getElementById("contentWindow").innerHTML = queueHtml;
+                $('.ui-dialog-titlebar').empty();
+                if (key === "playlists") {
+                    document.getElementById("contentWindow").innerHTML = _this.playlistHtml;
+                    $('.ui-dialog-titlebar').append('<div id="removeDialog" class="remove" onClick="popupWindow.closeDialog()"><h1>X</h1></div>');
+                    $("#contentWindow").css({
+                        'display' : 'inline-block',
+                        'overflow-y' : 'scroll',
+                        'height' : '870px'
+                    });
+                } else {
+                    document.getElementById("contentWindow").innerHTML = _this.queueHtml;
+                    $('.ui-dialog-titlebar').append('<div id="removeDialog" class="remove" onClick="popupWindow.closeDialog()"><h1>X</h1></div> <span class="title">' + _this.videoMod.title + '</span>');
+                    $("#contentWindow").css({
+                        'display' : 'inline-block',
+                        'overflow' : 'auto',
+                        'height' : 'auto'
+                    });
+                }
             }
         });
-        $(".ui-dialog").css("width", "auto");
-        $("#contentWindow").css({
-            'display' : 'inline-block',
-            'overflow' : 'auto',
-            'height' : 'auto'
-        });
-    }
+        /*$(".ui-dialog").css("width", "auto");*/
+        $(window).scrollTop($('.ui-dialog').offset().top);
+    };
+    this.init = function(callback) {
+        if (key === "playlists") {
+            _this.playlistHtml = '<div id="vid"></div>';
+            currentUser.subscriptions[_this.chan].getPlaylists(function () {
+                _this.playlists = currentUser.subscriptions[_this.chan].playlists;
+                for (var i = 0; i < currentUser.subscriptions[_this.chan].playlists.length; i++) {
+                    _this.playlistHtml += '<div id="queue' + i + '" class="videoPlaylist"><a href="#" id="vid" onClick="popupWindow.replaceVideo(' + i + ',' + _this.chan + ', \'playlist\');return false;"><span class="videoInfo"><span class="title">'
+                     + _this.playlists[i].title + '</span><br /><img src="' + _this.playlists[i].thumbnail + '" /></a><p><a href="http://www.youtube.com/channel/' + _this.playlists[i].ownerId + '" target="_blank">' + _this.playlists[i].owner
+                      + '</a><br /><p><span class="desc">' + _this.playlists[i].description + '</span></span></div>';
+                    if (i === currentUser.subscriptions[_this.chan].playlists.length - 1) {
+                        popupWindow.openWindow();
+                    }
+                }
+            });
+        } else {
+            _this.videoMod = currentUser.subscriptions[_this.chan].videos[_this.key];
+            _this.queueHtml = '<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + _this.videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; ' + _this.videoMod.date + ' hours ago &bull; ' + _this.videoMod.duration + ' Views &bull; &uarr; ' + _this.videoMod.likes + ', &darr; ' + _this.videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + _this.videoMod.id + '" target="_blank">View on YouTube</a></h1></div>';
+            if (currentUser.queue.length > 0) {
+                for (var i = 0; i < currentUser.queue.length; i++) {
+                    _this.queue = currentUser.subscriptions[currentUser.queue[i][1]].videos[currentUser.queue[i][0]];
+                    _this.queueHtml += '<div id="queue' + i + '" class="video"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="" id="vid" onClick="popupWindow.replaceVideo(' + currentUser.queue[i][0] + ',' + currentUser.queue[i][1] + ', \'video\');return false;"><span class="videoInfo"><span class="title">'
+                     + _this.queue.title + '</span><br /><img src="https://i.ytimg.com/vi/' + _this.queue.id + '/mqdefault.jpg" /></a><p><a href="http://www.youtube.com/channel/' + _this.queue.ownerId + '" target="_blank">' + _this.queue.owner
+                      + '</a><br />' + _this.queue.date + ' hours ago &bull; ' + _this.queue.duration + ' &bull; ' + _this.queue.views + ' Views &bull; &uarr; ' + _this.queue.likes + ', &darr; ' + _this.queue.dislikes + '<br /><p><span class="desc">' + _this.queue.description + '</span></span></div>';
+                }
+                _this.openWindow();
+            } else {
+                _this.openWindow();
+            }
+        }
+    };
+    this.init();
 }
 
 //User Object
@@ -325,15 +329,6 @@ function User() {
         _this.queue.splice(key, 1);
         $("#queue" + key).remove();
     };
-    this.replaceVideo = function(key, chan, type) {
-        if (type === "playlist") {
-            var videoMod = currentUser.subscriptions[chan].playlists[key];
-            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="853" height="480" src="' + videoMod.url + '" frameborder="0" allowfullscreen></iframe><br /><h1>' + videoMod.title + ' &bull; <a href="http://www.youtube.com/channel/' + videoMod.ownerId + '" target="_blank">' + videoMod.owner + '</a> &bull; <a href="' + videoMod.url + '" target="_blank">View on YouTube</a></h1></div>');
-        } else if (type === "video"){
-            var videoMod = currentUser.subscriptions[chan].videos[key];
-            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="853" height="480" src="//www.youtube.com/embed/' + videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + videoMod.ownerId + '" target="_blank">' + videoMod.owner + '</a> &bull; ' + videoMod.date + ' hours ago &bull; ' + videoMod.duration + ' Views &bull; &uarr; ' + videoMod.likes + ', &darr; ' + videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + videoMod.id + '" target="_blank">View on YouTube</a></h1></div>');
-        }
-}
     this.display = function() {
         var tempChanCount = 0;
         for (var i = 0; i < this.subscriptions.length; i++) {
@@ -384,7 +379,7 @@ function onClientLoad() {
 
 function onYouTubeApiLoad() {
     loading(20, "API Loaded");
-    gapi.client.setApiKey('AIzaSyAovj5X_gBnFTX2uJkGwYabTOX5pPGqJQE');
+    gapi.client.setApiKey('AIzaSyBPXzLUhHv5pQZMz9VpSl7pJps-0efWks4');
     //User object creation.
     currentUser = new User();
 }

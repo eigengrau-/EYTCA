@@ -18,6 +18,7 @@ body {
     display: none;
     height: auto;
     overflow: auto;
+    width: 100% !important;
 }
 
 #progressbar, #loadingLogout {
@@ -63,11 +64,12 @@ iframe {
 
 .title, .ui-widget-content a {
     text-shadow: 2px 2px 4px #000;
-    font-size: 24px;
+    font-size: 1.3em;
     font-weight: 500;
     margin-bottom: 15px;
     color: #72AECF;
 }
+
 
 .title p, {
     font-size: 25px;
@@ -84,8 +86,11 @@ iframe {
 }
 
 .desc {
-    font-size: 12px;
+    font-size: 0.8em;
     color: #8FA9B8;
+    display: block;
+    width: 100%;
+    height: auto;
 }
 
 .info-title {
@@ -212,25 +217,26 @@ iframe {
     background-color: rgba(2,22,22,.3);
     border-radius: 10px;
     overflow: auto;
+    text-align: center;
 }
 
-#chan a img{
+#chan a img {
     border: 5px solid #4A93BD;
-    margin: 0 4px 8px 0;
-    width: 21%;
-    height: 35%;
+    margin: 0 5% 5% 0;
+    /*width: 21%;
+    height: 35%;*/
 }
 
 #noVids a img {
     border: 5px solid #4B5E69;
-    margin: 0 4px 8px 0;
-    width: 21%;
-    height: 35%;
+    margin: 0 5% 5% 0;
+    /*width: 21%;
+    height: 35%;*/
 }
 
 #noVids, #chan {
     opacity: 0.8;
-    display: inline;
+    display: inline-block;
 }
 #chan:hover, #noVids:hover {
     opacity: 1.0;
@@ -288,9 +294,10 @@ iframe {
 }
 
 .remove {
-    padding: 6px;
+    padding: 0.5%;
     width: auto;
     height: auto;
+    margin: 0.5% 0 0 0.5%
 }
 
 .remove p {
@@ -304,7 +311,7 @@ iframe {
 
 #video, .video, .videoPlaylist {
     float: left;
-    display: inline;
+    display: block;
     border-radius: 10px;
     /*height: 375px;*/
     height: 40%;
@@ -334,7 +341,9 @@ iframe {
     display: inline-block;
     border: 2px solid #4B5E69;
     margin: 5px;
-    width: 95%;
+    height: 35%;
+    /*width: 95%;*/
+    max-width: 100%;
 }
 
 .videoInfo {
@@ -379,7 +388,7 @@ a:hover,.title:hover {
     float: left;
 }
 
-#chantitle .title, .chanTitle.title {
+.chanTitle.title {
     margin-top: 0.7564296520423601%;
 }
 
@@ -467,6 +476,7 @@ a:hover,.title:hover {
     text-align:center;
 }
 
+
 .ui-widget {
     color: #8FA9B8;
     font-family: Cambria, Georgia, serif;
@@ -491,9 +501,8 @@ a:hover,.title:hover {
     color: #8FA9B8;
 }
 .ui-widget-header {
-    border: 1px solid #333333;
-    color: #ffffff;
-    font-weight: bold;
+    height: 5%;
+    width: auto;
 }
 
 .ui-button {
