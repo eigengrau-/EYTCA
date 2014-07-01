@@ -260,7 +260,7 @@ iframe {
     background: linear-gradient(to bottom, rgba(75,94,105,0.45) 0%, rgba(48,54,56,0.3) 100%);
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4b5e69', endColorstr='#303638', GradientType=0 );
 }
-.ui-tooltip, #infoHome, #info, #chanList, #chanTitle, #info3, .chanTitle {
+.custTooltip, #infoHome, #info, #chanList, #chanTitle, #info3, .chanTitle {
     -webkit-box-shadow: 0px 10px 18px #292d2f;
     box-shadow: 0px 10px 18px #292d2f;
 }
@@ -300,28 +300,37 @@ iframe {
     margin: 0.5% 0 0 0.5%
 }
 
-.remove p {
-
+.custTooltip {
+    max-width: 15%;
+    background:#121314 !important;
+    padding:8px;
+    position:absolute;
+    z-index:9999;
+    border-radius: 10px;
+    color: #72AECF;
+    font-family: Cambria, Georgia, serif !important;
+    margin: 2px;
+    word-wrap: break-word;
 }
 
-/*#removeAll {
-    width: ;
-    display: none;
-}*/
-
-#video, .video, .videoPlaylist {
+#video, .video, .videoPlaylist, .videoQueue {
     float: left;
     display: block;
     border-radius: 10px;
     /*height: 375px;*/
-    height: 40%;
+    height: 34%;
     width: 23%;
     /*width: 312px;*/
     padding: 0.37821482602118006%;
     margin: 0.75643% 0 0 0.75643%;
     background-color: rgb(30,34,37);
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
     text-align: center;
+}
+
+.videoQueue {
+    height: auto !important;
 }
 
 #vid {
@@ -337,12 +346,11 @@ iframe {
     background-color: rgb(26,30,32);
 }
 
-#video img, .video img, .videoPlaylist img {
+#video img, .video img, .videoPlaylist img, .videoQueue img {
     display: inline-block;
     border: 2px solid #4B5E69;
     margin: 5px;
-    height: 35%;
-    /*width: 95%;*/
+    width: 95%;
     max-width: 100%;
 }
 
@@ -380,11 +388,12 @@ a:hover,.title:hover {
     float: left;
     padding: 0.37821482602118006%;
     border-radius: 10px;
+    text-align: left;
 }
 
 #chanTitle img, .chanTitle img {
     border: 5px solid #4A93BD;
-    margin-bottom: 0px;
+    margin: 1%;
     float: left;
 }
 
@@ -404,26 +413,6 @@ a:hover,.title:hover {
 .arrow:after {
     background: #506570;
     border: 2px solid white;
-}
-
-.ui-tooltip {
-    background: #323739;
-    padding:8px;
-    position:absolute;
-    z-index:9999;
-    /*max-width:300px;*/
-    border-radius: 10px;
-    color: #72AECF;
-    font-family: Cambria, Georgia, serif !important;
-    margin: 2px;
-    background: rgba(78,94,105,1);
-    background: -moz-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
-    background: -webkit-gradient(left top, left bottom, color-stop(0%, rgba(78,94,105,1)), color-stop(100%, rgba(48,54,56,1)));
-    background: -webkit-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
-    background: -o-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
-    background: -ms-linear-gradient(top, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
-    background: linear-gradient(to bottom, rgba(78,94,105,1) 0%, rgba(48,54,56,1) 100%);
-    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#4e5e69', endColorstr='#303638', GradientType=0 );
 }
 
 #progressbar .ui-progressbar-value {
