@@ -118,11 +118,11 @@ function Channel(readableName, channelId, avatar) {
             currentUser.newVideos++;
             if (i === 0) {
                 html.push('<div id="chan' + _this.channelId + '"><span class="chanTitle"><span class="title"><h1><a name="' + _this.channelId + '"><a href="http://www.youtube.com/channel/' + _this.channelId + '" target="_blank"><img src="' + _this.avatar
-                + '" width="80px" height="80px"/>' + _this.readableName + '</a></a> &bull; <a name="numResults">' + _this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="#" id="vid" onClick="popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ _this.channelId + '\');return false;">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></span>');
+                + '" width="80px" height="80px"/>' + _this.readableName + '</a></a> &bull; <a name="numResults">' + _this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="javascript: popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></span>');
             }
-            html.push('<div id="vid' + currentUser.newVideos + '" class="video" title="' + _this.videos[i].description + '"><a href="#" id="vid" onClick="popupWindow = new Popup(\'' + i + '\', \''+ key + '\', \''+ _this.channelId + '\');return false;"><span class="title">' + _this.videos[i].title + '</span><br /><img src="' + _this.videos[i].thumbnail
+            html.push('<div id="vid' + currentUser.newVideos + '" class="video" title="' + _this.videos[i].description + '"><a href="javascript: popupWindow = new Popup(\'' + i + '\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid"><span class="title">' + _this.videos[i].title + '</span><br /><img src="' + _this.videos[i].thumbnail
              + '" /></a><p>' + multipleDate + ' &bull; ' + _this.videos[i].duration + ' &bull; ' + _this.videos[i].views + ' Views <br /> &uarr; ' + _this.videos[i].likes + ', &darr; ' + _this.videos[i].dislikes
-              + '<br /><a href="#" id="addToQueue" onClick="currentUser.addToQueue(\'' + i + '\', \''+ key + '\');return false;">Add to queue</a></div>');
+              + '<br /><a href="javascript: currentUser.addToQueue(\'' + i + '\', \''+ key + '\');" id="addToQueue">Add to queue</a></div>');
             if (i === _this.videos.length - 1) {
                 html.push('</div>');
             }
@@ -213,7 +213,7 @@ function Popup(key, chan, chanId) {
             currentUser.subscriptions[_this.chan].getPlaylists(function () {
                 _this.playlists = currentUser.subscriptions[_this.chan].playlists;
                 for (var i = 0; i < currentUser.subscriptions[_this.chan].playlists.length; i++) {
-                    _this.playlistHtml += '<div id="queue' + i + '" class="videoPlaylist" title="' + _this.playlists[i].description + '"><a href="#" id="vid" onClick="popupWindow.replaceVideo(' + i + ',' + _this.chan + ', \'playlist\');return false;"><span class="videoInfo"><span class="title">'
+                    _this.playlistHtml += '<div id="queue' + i + '" class="videoPlaylist" title="' + _this.playlists[i].description + '"><a href="javascript: popupWindow.replaceVideo(' + i + ',' + _this.chan + ', \'playlist\')" id="vid"><span class="videoInfo"><span class="title">'
                      + _this.playlists[i].title + '</span><br /><img src="' + _this.playlists[i].thumbnail + '" /></a><p><a href="http://www.youtube.com/channel/' + _this.playlists[i].ownerId + '" target="_blank">' + _this.playlists[i].owner
                       + '</a></span></div>';
                     if (i === currentUser.subscriptions[_this.chan].playlists.length - 1) {
@@ -334,16 +334,7 @@ function User() {
         });
     };
     this.addToQueue = function(video, chan) {
-        //Fix
-        if ($.cookie("queueCookie")) {
-            _this.queue = $.cookie("queueCookie");
-        }
         _this.queue.push([video, chan]);
-        $.cookie("queueCookie", _this.queue, {
-            path: "/eytca/",
-            expires: 365
-        });
-
     };
     this.removeFromQueue = function(key) {
         _this.queue.splice(key, 1);
@@ -392,13 +383,11 @@ function User() {
 function onClientLoad() {
     $("#progressbar").progressbar({ max: 100 });
     loading(10, "Client Loaded");
-    gapi.client.load('youtube', 'v3', onYouTubeApiLoad);
+    gapi.client.load('youtube', 'v3', function() {
+        loading(20, "API Loaded");
+        gapi.client.setApiKey('AIzaSyBPXzLUhHv5pQZMz9VpSl7pJps-0efWks4');
+        //User object creation.
+        currentUser = new User();
+    });
     currentTime = moment();
-}
-
-function onYouTubeApiLoad() {
-    loading(20, "API Loaded");
-    gapi.client.setApiKey('AIzaSyBPXzLUhHv5pQZMz9VpSl7pJps-0efWks4');
-    //User object creation.
-    currentUser = new User();
 }
