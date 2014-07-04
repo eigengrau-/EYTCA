@@ -329,6 +329,10 @@ iframe {
     text-align: center;
 }
 
+.videoPlaylist {
+    height: 45% !important;
+}
+
 .videoQueue {
     height: auto !important;
 }
@@ -346,6 +350,7 @@ iframe {
     background-color: rgb(26,30,32);
 }
 
+
 #video img, .video img, .videoPlaylist img, .videoQueue img {
     display: inline-block;
     border: 2px solid #4B5E69;
@@ -357,8 +362,8 @@ iframe {
 .videoInfo {
     text-align: center;
     word-wrap: break-word;
-    max-width:280px;
-    max-height:170px;
+    max-width: 280px;
+    max-height: 170px;
 }
 
 a:hover,.title:hover {
