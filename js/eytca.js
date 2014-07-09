@@ -11,6 +11,7 @@ function loading(val, msg) {
 function logout() {
     $.removeCookie("user", { path: "/eytca/" });
     $.removeCookie("days", { path: "/eytca/" });
+    $.removeCookie("queue", { path: "/eytca/" });
     $(location).attr("href", "/eytca/");
 }
 
@@ -152,6 +153,7 @@ function Channel(readableName, channelId, avatar) {
     };
 }
 
+//Video popup object
 function Popup(key, chan, chanId) {
     this.key = key;
     this.chan = chan;
@@ -165,7 +167,7 @@ function Popup(key, chan, chanId) {
     this.closeDialog = function() {
         $("#contentWindow").dialog("destroy");
     };
-    this.replaceVideo = function(key, chan, type) {
+    this.replaceVideo = function(key, chan, type) {    //Replaced currently displayed video with one from the queue.
         if (type === "playlist") {
             _this.videoMod = currentUser.subscriptions[chan].playlists[key];
             $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="' + _this.videoMod.url + '" frameborder="0" allowfullscreen></iframe><br /><h1>' + _this.videoMod.title + ' &bull; <a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; <a href="' + _this.videoMod.url + '" target="_blank">View on YouTube</a></h1></div>');
@@ -205,7 +207,7 @@ function Popup(key, chan, chanId) {
                 }
             }
         });
-        $(window).scrollTop($('.ui-dialog').offset().top);
+        $(window).scrollTop($('.ui-dialog').offset().top);    //Scroll to opened dialog.
     };
     this.init = function(callback) {
         if (key === "playlists") {
@@ -286,6 +288,9 @@ function User() {
             _this.avatar = result.items[0].snippet.thumbnails.high.url;
             _this.readableName = result.items[0].snippet.title;
             loading(50, 'Hello ' + _this.readableName + '!');
+            if ($.cookie("queue")) {
+                _this.queue = JSON.parse($.cookie("queue"));
+            }
             _this.getSubscriptions();
         });
     };
@@ -333,12 +338,21 @@ function User() {
             }
         });
     };
+    this.temp;
     this.addToQueue = function(video, chan) {
         _this.queue.push([video, chan]);
+        $.cookie("queue", JSON.stringify(_this.queue), {
+            path: "/eytca/",
+            expires: 365
+        });
     };
     this.removeFromQueue = function(key) {
         _this.queue.splice(key, 1);
         $("#queue" + key).remove();
+        $.cookie("queue", JSON.stringify(_this.queue), {
+            path: "/eytca/",
+            expires: 365
+        });
     };
     this.display = function() {
         var tempChanCount = 0;
@@ -353,7 +367,6 @@ function User() {
             tempChanCount++;
         }
         $(document).tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
-        /*$('#container').css("width", 68.85416666666667/100*_this.viewport + 'px');*/
         $('#info3').css("background-image", "url('" + _this.avatar + "')");
         $('#info3').css("background-size", "100%");
         $('#header').remove();
