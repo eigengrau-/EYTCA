@@ -51,7 +51,6 @@ $(document).ready(function() {
 
     var user = $.cookie("user");
 
-
     if (user !== undefined) {
         var userAv = $.cookie("userAv");
         $(location).attr("href", '/eytca/eytca.html');

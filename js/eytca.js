@@ -87,7 +87,7 @@ function Channel(readableName, channelId, avatar) {
             }
         });
     };
-    this.getVideos(function() {         //Get Channel's videos, callback function requests all videos info.
+    _this.getVideos(function() {         //Get Channel's videos, callback function requests all videos info.
         var request = gapi.client.youtube.videos.list({
             part: 'contentDetails, statistics',
             id: tempVideoIds.join(),    //Requests info of all videos simultaneously.
@@ -123,7 +123,7 @@ function Channel(readableName, channelId, avatar) {
             }
             html.push('<div id="vid' + currentUser.newVideos + '" class="video" title="' + _this.videos[i].description + '"><a href="javascript: popupWindow = new Popup(\'' + i + '\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid"><span class="title">' + _this.videos[i].title + '</span><br /><img src="' + _this.videos[i].thumbnail
              + '" /></a><p>' + multipleDate + ' &bull; ' + _this.videos[i].duration + ' &bull; ' + _this.videos[i].views + ' Views <br /> &uarr; ' + _this.videos[i].likes + ', &darr; ' + _this.videos[i].dislikes
-              + '<br /><a href="javascript: currentUser.addToQueue(\'' + i + '\', \''+ key + '\');" id="addToQueue">Add to queue</a></div>');
+              + '<br /><a href="javascript: currentUser.addToQueue(\'' + i + '\', \''+ key + '\', \''+ _this.videos[i].id + '\');" id="addToQueue">Add to queue</a></div>');
             if (i === _this.videos.length - 1) {
                 html.push('</div>');
             }
@@ -288,9 +288,6 @@ function User() {
             _this.avatar = result.items[0].snippet.thumbnails.high.url;
             _this.readableName = result.items[0].snippet.title;
             loading(50, 'Hello ' + _this.readableName + '!');
-            if ($.cookie("queue")) {
-                _this.queue = JSON.parse($.cookie("queue"));
-            }
             _this.getSubscriptions();
         });
     };
@@ -339,8 +336,8 @@ function User() {
         });
     };
     this.temp;
-    this.addToQueue = function(video, chan) {
-        _this.queue.push([video, chan]);
+    this.addToQueue = function(video, chan, vidID) {
+        _this.queue.push([video, chan, vidID]);
         $.cookie("queue", JSON.stringify(_this.queue), {
             path: "/eytca/",
             expires: 365
@@ -354,6 +351,23 @@ function User() {
             expires: 365
         });
     };
+    this.verifyQueue = function() {
+        if ($.cookie("queue")) {
+            var tempQueue = JSON.parse($.cookie("queue"));
+            console.log(tempQueue);
+            for (var i = 0; i < tempQueue.length; i++) {
+                if (_this.subscriptions[tempQueue[i][0]].videos[tempQueue[i][1]] === undefined || _this.subscriptions[tempQueue[i][0]].videos[tempQueue[i][1]].id != tempQueue[i][2]) {
+                    console.log("Expired video(s) removed from queue: " + tempQueue[i]);
+                    tempQueue.splice(i, 1);
+                }
+            }
+            _this.queue = tempQueue;
+            $.cookie("queue", JSON.stringify(_this.queue), {
+                path: "/eytca/",
+                expires: 365
+            });
+        }
+    }
     this.display = function() {
         var tempChanCount = 0;
         for (var i = 0; i < _this.subscriptions.length; i++) {
@@ -366,6 +380,13 @@ function User() {
             }
             tempChanCount++;
         }
+        //Append user info to page.
+        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><span class="title"><a href="http://www.youtube.com/channel/' + _this.userId + '" target="_blank">' + _this.readableName + '</a></span><p>Total Videos: ' + _this.newVideos
+         + '| Total Subscriptions: ' + _this.totalSubs + '</p></div><div id="clearCookies"><a href="" onClick="logout();return false;">Logout</a></div>';
+        document.getElementById('chanList').innerHTML = chanList.join('');
+        //Append main content to page.
+        document.getElementById('contentArea').innerHTML = html.join('');
+        _this.verifyQueue();
         $(document).tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
         $('#info3').css("background-image", "url('" + _this.avatar + "')");
         $('#info3').css("background-size", "100%");
@@ -373,12 +394,6 @@ function User() {
         $("#info:hidden").show();
         $("#info3:hidden").show();
         $("#chanList:hidden").show();
-        //Append user info to page.
-        document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><span class="title"><a href="http://www.youtube.com/channel/' + _this.userId + '" target="_blank">' + _this.readableName + '</a></span><p>Total Videos: ' + _this.newVideos
-         + '| Total Subscriptions: ' + _this.totalSubs + '</p></div><div id="clearCookies"><a href="" onClick="logout();return false;">Logout</a></div>';
-        document.getElementById('chanList').innerHTML = chanList.join('');
-        //Append main content to page.
-        document.getElementById('contentArea').innerHTML = html.join('');
         $('#contentArea').show();
     };
     //Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
