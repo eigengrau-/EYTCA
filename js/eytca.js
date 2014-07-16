@@ -178,6 +178,9 @@ function Popup(key, chan, chanId) {
         }
     };
     this.openWindow = function() {
+        if ($(".ui-dialog").length > 0 ) {
+            _this.closeDialog();
+        }
         $("#contentWindow").dialog({
             resizable: false,
             draggable: true,
