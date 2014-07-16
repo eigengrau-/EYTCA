@@ -31,7 +31,8 @@ p,h1,h2,h3,h4,a,ul,li,.remove {
 }
 
 h1 {
-    font-size: 23px;
+    /*font-size: 23px;*/
+    font-size: 1.4vw;
     font-weight: 500;
     margin: 0;
 }
@@ -42,7 +43,8 @@ h2 {
 }
 
 p {
-    font-size: 15px;
+    font-size: 0.85vw;
+    /*font-size: 15px;*/
 }
 
 b {
@@ -64,7 +66,8 @@ iframe {
 
 .title, .ui-widget-content a {
     text-shadow: 2px 2px 4px #000;
-    font-size: 1.3em;
+    /*font-size: 1.3em;*/
+    font-size: 1.3vw;
     font-weight: 500;
     margin-bottom: 15px;
     color: #72AECF;
@@ -78,7 +81,8 @@ iframe {
 }
 
 .title h1 a {
-    font-size: 30px;
+    /*font-size: 30px;*/
+    font-size: 1.5vw;
 }
 
 .videoInfo p {
@@ -98,7 +102,8 @@ iframe {
 }
 
 .infoTitle p, .videoHeader {
-    font-size: 3.3em;
+    /*font-size: 3.3em;*/
+    font-size: 3.5vw;
     font-weight: 900;
     margin: 0;
     line-height: 80%;
@@ -121,7 +126,8 @@ iframe {
     text-align: center;
     margin: 10px;
     color: #8FA9B8;
-    font-size: 15px;
+    /*font-size: 15px;*/
+    font-size: 0.87vw;
 }
 
 #userInfo {
@@ -153,7 +159,8 @@ iframe {
     color: #8FA9B8;
     font-family: Cambria, Georgia, serif;
     margin: 2px;
-    font-size: 18px;
+    /*font-size: 18px;*/
+    font-size: 1vw;
 }
 
 .intro h4 {
@@ -171,7 +178,8 @@ iframe {
 }
 
 .infoTitle h4 {
-    font-size: 2em;
+    /*font-size: 2em;*/
+    font-size: 1.5vw;
     font-weight: lighter;
     margin-top: 3%;
 }
@@ -222,21 +230,23 @@ iframe {
 
 #chan a img {
     border: 5px solid #4A93BD;
-    margin: 0 5% 5% 0;
-    /*width: 21%;
-    height: 35%;*/
+    margin: 0 1.5% 1.5% 0;
+    width: 21%;
+    float: left;
+    display: inline-block;
 }
 
 #noVids a img {
     border: 5px solid #4B5E69;
-    margin: 0 5% 5% 0;
-    /*width: 21%;
-    height: 35%;*/
+    margin: 0 1.5% 1.5% 0;
+    width: 21%;
+    float: left;
+    display: inline-block;
 }
 
 #noVids, #chan {
     opacity: 0.8;
-    display: inline-block;
+    /*display: inline-block;*/
 }
 #chan:hover, #noVids:hover {
     opacity: 1.0;
@@ -245,7 +255,8 @@ iframe {
 #infoHome {
     padding: 20px;
     border-radius: 10px;
-    max-width: 700px;
+    /*max-width: 700px;*/
+    width: 40%;
     margin-left: auto;
     margin-right: auto;
 }
@@ -355,7 +366,7 @@ iframe {
     display: inline-block;
     border: 2px solid #4B5E69;
     margin: 5px;
-    width: 95%;
+    width: 90%;
     max-width: 100%;
 }
 
@@ -400,6 +411,7 @@ a:hover,.title:hover {
     border: 5px solid #4A93BD;
     margin: 1%;
     float: left;
+    width: 8%;
 }
 
 .chanTitle.title {

@@ -106,7 +106,7 @@ function Channel(readableName, channelId, avatar) {
     });
     this.display = function(key) {    //Called by User Display method.
         var multiple = (_this.videos.length > 1 ? "s" : "");
-        chanList.push('<div id="chan"><a href="#' + _this.channelId + '" title="' + _this.readableName + ' &bull; ' + _this.videos.length + '"><img src="' + _this.avatar + '" width="80px" height="80px"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
+        chanList.push('<div id="chan"><a href="#' + _this.channelId + '" title="' + _this.readableName + ' &bull; ' + _this.videos.length + '"><img src="' + _this.avatar + '"/></a></div>');    //Avatar display. Light border if Channel has videos. Hover tooltip includes title and # videos.
         for (var i = 0; i < _this.videos.length; i++) {
             var multipleDate;
             if (_this.videos[i].date > 1) {
@@ -119,7 +119,7 @@ function Channel(readableName, channelId, avatar) {
             currentUser.newVideos++;
             if (i === 0) {
                 html.push('<div id="chan' + _this.channelId + '"><span class="chanTitle"><span class="title"><h1><a name="' + _this.channelId + '"><a href="http://www.youtube.com/channel/' + _this.channelId + '" target="_blank"><img src="' + _this.avatar
-                + '" width="80px" height="80px"/>' + _this.readableName + '</a></a> &bull; <a name="numResults">' + _this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="javascript: popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></span>');
+                + '"/>' + _this.readableName + '</a></a> &bull; <a name="numResults">' + _this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="javascript: popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></span>');
             }
             html.push('<div id="vid' + currentUser.newVideos + '" class="video" title="' + _this.videos[i].description + '"><a href="javascript: popupWindow = new Popup(\'' + i + '\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid"><span class="title">' + _this.videos[i].title + '</span><br /><img src="' + _this.videos[i].thumbnail
              + '" /></a><p>' + multipleDate + ' &bull; ' + _this.videos[i].duration + ' &bull; ' + _this.videos[i].views + ' Views <br /> &uarr; ' + _this.videos[i].likes + ', &darr; ' + _this.videos[i].dislikes
@@ -173,6 +173,7 @@ function Popup(key, chan, chanId) {
             $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="' + _this.videoMod.url + '" frameborder="0" allowfullscreen></iframe><br /><h1>' + _this.videoMod.title + ' &bull; <a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; <a href="' + _this.videoMod.url + '" target="_blank">View on YouTube</a></h1></div>');
         } else if (type === "video"){
             _this.videoMod = currentUser.subscriptions[chan].videos[key];
+            $('.ui-dialog-titlebar').html('<div id="removeDialog" class="remove" onClick="popupWindow.closeDialog()"><h1>X</h1></div> <span class="title">' + _this.videoMod.title + '</span>');
             $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + _this.videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; ' + _this.videoMod.date + ' hours ago &bull; ' + _this.videoMod.duration + ' Views &bull; &uarr; ' + _this.videoMod.likes + ', &darr; ' + _this.videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + _this.videoMod.id + '" target="_blank">View on YouTube</a></h1></div>');
         }
     };
@@ -356,6 +357,7 @@ function User() {
             var tempQueue = JSON.parse($.cookie("queue"));
             console.log(tempQueue);
             for (var i = 0; i < tempQueue.length; i++) {
+                //Not detecting expired videos still
                 if (_this.subscriptions[tempQueue[i][0]].videos[tempQueue[i][1]] === undefined || _this.subscriptions[tempQueue[i][0]].videos[tempQueue[i][1]].id != tempQueue[i][2]) {
                     console.log("Expired video(s) removed from queue: " + tempQueue[i]);
                     tempQueue.splice(i, 1);
@@ -376,7 +378,7 @@ function User() {
             } else {
                 //Channel has no videos. Avatar border is dark and links to their YouTube channel page.
                 chanList.push('<div id="noVids"><a href="http://www.youtube.com/channel/' + _this.subscriptions[i].channelId + '" target="_blank" title="' + _this.subscriptions[i].readableName + '"><img src="' + _this.subscriptions[i].avatar
-                 + '" width="80px" height="80px"/></a></div>');
+                 + '" /></a></div>');
             }
             tempChanCount++;
         }
