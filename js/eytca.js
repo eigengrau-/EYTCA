@@ -177,7 +177,6 @@ function Popup(key, chan, chanId) {
     this.scrollHandlerl
     var _this = this;
     this.closeDialog = function() {
-        $(window).unbind("scroll");
         $("#contentWindow").dialog("destroy");
     };
     this.replaceVideo = function(key, chan, type) {    //Replaced currently displayed video with one from the queue.
@@ -185,9 +184,9 @@ function Popup(key, chan, chanId) {
             _this.videoMod = currentUser.subscriptions[chan].playlists[key];
             $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="' + _this.videoMod.url + '" frameborder="0" allowfullscreen></iframe><br /><h1>' + _this.videoMod.title + ' &bull; <a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; <a href="' + _this.videoMod.url + '" target="_blank">View on YouTube</a></h1></div>');
         } else if (type === "video"){
-            _this.videoMod = currentUser.subscriptions[chan].videos[key];
-            $('.ui-dialog-titlebar').html('<div id="removeDialog" class="remove" onClick="popupWindow.closeDialog()"><h1>X</h1></div> <span class="title">' + _this.videoMod.title + '</span>');
-            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + _this.videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; ' + _this.videoMod.date + ' hours ago &bull; ' + _this.videoMod.duration + ' Views &bull; &uarr; ' + _this.videoMod.likes + ', &darr; ' + _this.videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + _this.videoMod.id + '" target="_blank">View on YouTube</a></h1></div>');
+            //_this.videoMod = currentUser.subscriptions[chan].videos[key];
+            $('.ui-dialog-titlebar').html('<div id="removeDialog" class="remove" onClick="popupWindow.closeDialog()"><h1>X</h1></div> <span class="title">' + currentUser.queue[key][0] + '</span>');
+            $("#contentWindow div#vid").replaceWith('<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + currentUser.queue[key][1] + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + currentUser.queue[key][6] + '" target="_blank">' + currentUser.queue[key][5] + '</a> &bull; ' + currentUser.queue[key][4] + ' hours ago &bull; ' + currentUser.queue[key][7] + ' Views &bull; &uarr; ' + currentUser.queue[key][9] + ', &darr; ' + currentUser.queue[key][10] + ' &bull; <a href="http://www.youtube.com/watch?v=' + currentUser.queue[key][1] + '" target="_blank">View on YouTube</a></h1></div>');
         }
     };
     this.openWindow = function() {
@@ -226,9 +225,6 @@ function Popup(key, chan, chanId) {
             }
         });
         $(window).scrollTop($('.ui-dialog').offset().top);    //Scroll to opened dialog.
-        /*$(window).scroll(function() {
-            $(window).scrollTop($('.ui-dialog').offset().top);
-        });*/
     };
     this.init = function(callback) {
         if (key === "playlists") {
@@ -249,8 +245,7 @@ function Popup(key, chan, chanId) {
             _this.queueHtml = '<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + _this.videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; ' + _this.videoMod.date + ' hours ago &bull; ' + _this.videoMod.duration + ' Views &bull; &uarr; ' + _this.videoMod.likes + ', &darr; ' + _this.videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + _this.videoMod.id + '" target="_blank">View on YouTube</a></h1></div>';
             if (currentUser.queue.length > 0) {
                 for (var i = 0; i < currentUser.queue.length; i++) {
-                    //_this.queue = currentUser.subscriptions[currentUser.queue[i][1]].videos[currentUser.queue[i][0]];
-                    _this.queueHtml += '<div id="queue' + i + '" class="videoQueue" title="'+ currentUser.queue[i][2] +'"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="" id="vid" onClick="popupWindow.replaceVideo(' + currentUser.queue[i][1] + ',' + currentUser.queue[i][6] + ', \'video\');return false;"><span class="title">'
+                    _this.queueHtml += '<div id="queue' + i + '" class="videoQueue" title="'+ currentUser.queue[i][2] +'"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="javascript: popupWindow.replaceVideo(' + i + ',' + 0 + ', \'video\');" id="vid"><span class="title">'
                      + currentUser.queue[i][0] + '</span><br /><img src="https://i.ytimg.com/vi/' + currentUser.queue[i][1] + '/mqdefault.jpg" /></a><p><a href="http://www.youtube.com/channel/' + currentUser.queue[i][6] + '" target="_blank">' + currentUser.queue[i][5]
                       + '</a><br />' + currentUser.queue[i][4] + ' hours ago &bull; ' + currentUser.queue[i][7] + ' &bull; ' + currentUser.queue[i][8] + ' Views &bull; &uarr; ' + currentUser.queue[i][9] + ', &darr; ' + currentUser.queue[i][10] + '<br /></div>';
                 }
