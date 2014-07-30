@@ -171,8 +171,10 @@ function Popup(key, chan, chanId) {
     this.playlists;
     this.videoMod;
     this.queue;
+    this.scrollHandlerl
     var _this = this;
     this.closeDialog = function() {
+        $(window).unbind("scroll");
         $("#contentWindow").dialog("destroy");
     };
     this.replaceVideo = function(key, chan, type) {    //Replaced currently displayed video with one from the queue.
@@ -190,8 +192,9 @@ function Popup(key, chan, chanId) {
             _this.closeDialog();
         }
         $("#contentWindow").dialog({
+            modal: true,
             resizable: false,
-            draggable: true,
+            draggable: false,
             position: {
                 my: "center top",
                 at: "center bottom",
@@ -219,7 +222,10 @@ function Popup(key, chan, chanId) {
                 }
             }
         });
-        $(window).scrollTop($('.ui-dialog').offset().top);    //Scroll to opened dialog.
+        //$(window).scrollTop($('.ui-dialog').offset().top);    //Scroll to opened dialog.
+        $(window).scroll(function() {
+            $(window).scrollTop($('.ui-dialog').offset().top);
+        });
     };
     this.init = function(callback) {
         if (key === "playlists") {
