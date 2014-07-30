@@ -16,9 +16,8 @@ body {
 
 #contentWindow {
     display: none;
-    height: auto;
-    overflow: auto;
     width: 100% !important;
+    overflow-y: scroll;
 }
 
 #progressbar, #loadingLogout {
