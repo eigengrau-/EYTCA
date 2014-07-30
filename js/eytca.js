@@ -402,16 +402,14 @@ function User() {
         //Append main content to page.
         document.getElementById('contentArea').innerHTML = html.join('');
         _this.verifyQueue();
-        $(document).tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
         $("#container").imagesLoaded(function() {
             $('#header').remove();
             $("#info:hidden").show();
             $("#info3:hidden").show();
             $("#chanList:hidden").show();
             $('#contentArea').show();
-            /*$(window).scroll(function() {
-                $(window).scrollTop($('#scrollTop').offset().top);
-            });*/
+            $("#contentArea").tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
+            $("#chanList").tooltip({ tooltipClass: "custTooltip", track: "true" });
         });
     };
     //Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
