@@ -65,6 +65,7 @@ function Channel(readableName, channelId, avatar) {
     this.channelId = channelId;
     this.avatar = avatar;
     this.playlists = [];
+    this.finished = false;
     var _this = this;
     this.getVideos = function(callback) {    //Gets each channel's videos. Called on creation of object.
         var request = gapi.client.youtube.search.list({
@@ -84,6 +85,8 @@ function Channel(readableName, channelId, avatar) {
                         callback();
                     }
                 }
+            } else {
+                _this.finished = true;
             }
         });
     };
@@ -96,11 +99,16 @@ function Channel(readableName, channelId, avatar) {
         request.execute(function(result) {
             if (result.items) {
                 for (var x = 0; x < result.items.length; x++) {
+                    if (x === result.items.length - 1) {
+                        _this.finished = true;
+                    }
                     _this.videos[x].duration = result.items[x].contentDetails.duration.replace("PT", "").toLowerCase();
                     _this.videos[x].views = result.items[x].statistics.viewCount;
                     _this.videos[x].likes = result.items[x].statistics.likeCount;
                     _this.videos[x].dislikes = result.items[x].statistics.dislikeCount;
                 }
+            } else {
+                _this.finished = true;
             }
         });
     });
@@ -386,6 +394,8 @@ function User() {
             tempChanCount++;
         }
         //Append user info to page.
+        $('#info3').css("background-image", "url('" + _this.avatar + "')");
+        $('#info3').css("background-size", "100%");
         document.getElementById('info3').innerHTML = '<div id="userInfo"><span class="infoTitle3"><span class="title"><a href="http://www.youtube.com/channel/' + _this.userId + '" target="_blank">' + _this.readableName + '</a></span><p>Total Videos: ' + _this.newVideos
          + '| Total Subscriptions: ' + _this.totalSubs + '</p></div><div id="clearCookies"><a href="" onClick="logout();return false;">Logout</a></div>';
         document.getElementById('chanList').innerHTML = chanList.join('');
@@ -393,22 +403,31 @@ function User() {
         document.getElementById('contentArea').innerHTML = html.join('');
         _this.verifyQueue();
         $(document).tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
-        $('#info3').css("background-image", "url('" + _this.avatar + "')");
-        $('#info3').css("background-size", "100%");
-        $('#header').remove();
-        $("#info:hidden").show();
-        $("#info3:hidden").show();
-        $("#chanList:hidden").show();
-        $('#contentArea').show();
+        $("#container").imagesLoaded(function() {
+            $('#header').remove();
+            $("#info:hidden").show();
+            $("#info3:hidden").show();
+            $("#chanList:hidden").show();
+            $('#contentArea').show();
+        });
     };
     //Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
     this.lastSubCheckTick = function() {
-        if (_this.subscriptions.length >= _this.totalSubs - _this.currentPage) {
-            loading(100, 'Loaded');
+        if (_this.subscriptions.length >= _this.totalSubs - _this.currentPage && _this.verifyChannels()) {
+            loading(100, 'Loading Images');
             //Sorts channel by name. Requesting the channels to be sorted alphabetically is not reliable.
             _this.subscriptions.sort(function(a,b) {return (a.readableName.toLowerCase() > b.readableName.toLowerCase()) ? 1 : ((b.readableName.toLowerCase() > a.readableName.toLowerCase()) ? -1 : 0);} );
             _this.display();
             clearInterval(checkTick);
+        }
+    };
+    this.verifyChannels = function() {
+        for (var i = 0; i < _this.totalSubs; i++) {
+            if (_this.subscriptions[i].finished === false) {
+                return false;
+            } else {
+                return true;
+            }
         }
     };
 }
