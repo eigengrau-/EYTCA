@@ -44,6 +44,9 @@ function Video(title, id, description, thumbnail, date, owner, ownerId) {
         }
     }
     this.trimTitle();
+    this.returnString = function() {
+        return [_this.title, _this.id, _this.description, _this.thumbnail, _this.date, _this.owner, _this.ownerId, _this.duration, _this.views, _this.likes, _this.dislikes];
+    };
     //The following properties are added on creation: Duration, views, likes, dislikes.
 }
 
@@ -222,10 +225,10 @@ function Popup(key, chan, chanId) {
                 }
             }
         });
-        //$(window).scrollTop($('.ui-dialog').offset().top);    //Scroll to opened dialog.
-        $(window).scroll(function() {
+        $(window).scrollTop($('.ui-dialog').offset().top);    //Scroll to opened dialog.
+        /*$(window).scroll(function() {
             $(window).scrollTop($('.ui-dialog').offset().top);
-        });
+        });*/
     };
     this.init = function(callback) {
         if (key === "playlists") {
@@ -246,10 +249,10 @@ function Popup(key, chan, chanId) {
             _this.queueHtml = '<div id="vid"><iframe width="100%" height="80%" src="//www.youtube.com/embed/' + _this.videoMod.id + '?version=3&vq=hd1080" frameborder="0" allowfullscreen></iframe><br /><h1><a href="http://www.youtube.com/channel/' + _this.videoMod.ownerId + '" target="_blank">' + _this.videoMod.owner + '</a> &bull; ' + _this.videoMod.date + ' hours ago &bull; ' + _this.videoMod.duration + ' Views &bull; &uarr; ' + _this.videoMod.likes + ', &darr; ' + _this.videoMod.dislikes + ' &bull; <a href="http://www.youtube.com/watch?v=' + _this.videoMod.id + '" target="_blank">View on YouTube</a></h1></div>';
             if (currentUser.queue.length > 0) {
                 for (var i = 0; i < currentUser.queue.length; i++) {
-                    _this.queue = currentUser.subscriptions[currentUser.queue[i][1]].videos[currentUser.queue[i][0]];
-                    _this.queueHtml += '<div id="queue' + i + '" class="videoQueue" title="'+ _this.queue.description +'"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="" id="vid" onClick="popupWindow.replaceVideo(' + currentUser.queue[i][0] + ',' + currentUser.queue[i][1] + ', \'video\');return false;"><span class="title">'
-                     + _this.queue.title + '</span><br /><img src="https://i.ytimg.com/vi/' + _this.queue.id + '/mqdefault.jpg" /></a><p><a href="http://www.youtube.com/channel/' + _this.queue.ownerId + '" target="_blank">' + _this.queue.owner
-                      + '</a><br />' + _this.queue.date + ' hours ago &bull; ' + _this.queue.duration + ' &bull; ' + _this.queue.views + ' Views &bull; &uarr; ' + _this.queue.likes + ', &darr; ' + _this.queue.dislikes + '<br /></div>';
+                    //_this.queue = currentUser.subscriptions[currentUser.queue[i][1]].videos[currentUser.queue[i][0]];
+                    _this.queueHtml += '<div id="queue' + i + '" class="videoQueue" title="'+ currentUser.queue[i][2] +'"><div id="remove" onClick="currentUser.removeFromQueue(' + i + ')">X</div><a href="" id="vid" onClick="popupWindow.replaceVideo(' + currentUser.queue[i][1] + ',' + currentUser.queue[i][6] + ', \'video\');return false;"><span class="title">'
+                     + currentUser.queue[i][0] + '</span><br /><img src="https://i.ytimg.com/vi/' + currentUser.queue[i][1] + '/mqdefault.jpg" /></a><p><a href="http://www.youtube.com/channel/' + currentUser.queue[i][6] + '" target="_blank">' + currentUser.queue[i][5]
+                      + '</a><br />' + currentUser.queue[i][4] + ' hours ago &bull; ' + currentUser.queue[i][7] + ' &bull; ' + currentUser.queue[i][8] + ' Views &bull; &uarr; ' + currentUser.queue[i][9] + ', &darr; ' + currentUser.queue[i][10] + '<br /></div>';
                 }
                 _this.openWindow();
             } else {
@@ -355,7 +358,7 @@ function User() {
     };
     this.temp;
     this.addToQueue = function(video, chan, vidID) {
-        _this.queue.push([video, chan, vidID]);
+        _this.queue.push(_this.subscriptions[chan].videos[video].returnString());
         $.cookie("queue", JSON.stringify(_this.queue), {
             path: "/eytca/",
             expires: 365
@@ -371,16 +374,7 @@ function User() {
     };
     this.verifyQueue = function() {
         if ($.cookie("queue")) {
-            var tempQueue = JSON.parse($.cookie("queue"));
-            console.log(tempQueue);
-            for (var i = 0; i < tempQueue.length; i++) {
-                //Not detecting expired videos still
-                if (_this.subscriptions[tempQueue[i][0]].videos[tempQueue[i][1]] === undefined || _this.subscriptions[tempQueue[i][0]].videos[tempQueue[i][1]].id != tempQueue[i][2]) {
-                    console.log("Expired video(s) removed from queue: " + tempQueue[i]);
-                    tempQueue.splice(i, 1);
-                }
-            }
-            _this.queue = tempQueue;
+            _this.queue = JSON.parse($.cookie("queue"));
             $.cookie("queue", JSON.stringify(_this.queue), {
                 path: "/eytca/",
                 expires: 365
@@ -415,12 +409,15 @@ function User() {
             $("#info3:hidden").show();
             $("#chanList:hidden").show();
             $('#contentArea').show();
+            /*$(window).scroll(function() {
+                $(window).scrollTop($('#scrollTop').offset().top);
+            });*/
         });
     };
     //Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
     this.lastSubCheckTick = function() {
         if (_this.subscriptions.length >= _this.totalSubs - _this.currentPage && _this.verifyChannels()) {
-            loading(100, 'Loading Images');
+            loading(100, 'Loading DOM');
             //Sorts channel by name. Requesting the channels to be sorted alphabetically is not reliable.
             _this.subscriptions.sort(function(a,b) {return (a.readableName.toLowerCase() > b.readableName.toLowerCase()) ? 1 : ((b.readableName.toLowerCase() > a.readableName.toLowerCase()) ? -1 : 0);} );
             _this.display();
