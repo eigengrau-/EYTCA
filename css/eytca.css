@@ -20,6 +20,18 @@ body {
     overflow-y: scroll;
 }
 
+#scroll {
+    display: none;
+    background-color: #323739;
+    width: auto;
+    height: auto;
+    line-height: 50px;
+    position: absolute;
+    top: 1vw;
+    left: 5vw;
+    border-radius: 10px;
+}
+
 #progressbar, #loadingLogout {
     margin: 3%;
 }
@@ -284,7 +296,7 @@ iframe {
     margin-top: 1.75643%;
 }
 
-#remove, #removeAll, .remove {
+#remove, #removeAll, .remove{
     padding-top: 8px;
     font-size: 12px;
     width: 25px;

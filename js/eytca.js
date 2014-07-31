@@ -130,7 +130,7 @@ function Channel(readableName, channelId, avatar) {
             currentUser.newVideos++;
             if (i === 0) {
                 html.push('<div id="chan' + _this.channelId + '"><span class="chanTitle"><span class="title"><h1><a name="' + _this.channelId + '"><a href="http://www.youtube.com/channel/' + _this.channelId + '" target="_blank"><img src="' + _this.avatar
-                + '"/>' + _this.readableName + '</a></a> &bull; <a name="numResults">' + _this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="javascript: popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid">View Playlists</a></span><br /><a href="#top">&uarr; TOP &uarr;</a></span>');
+                + '"/>' + _this.readableName + '</a></a> &bull; <a name="numResults">' + _this.videos.length + '</a> video' + multiple + ' since '+ now.format('MMMM Do') + ' &bull; </h1><a href="javascript: popupWindow = new Popup(\'playlists\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid">View Playlists</a></span></span>');
             }
             html.push('<div id="vid' + currentUser.newVideos + '" class="video" title="' + _this.videos[i].description + '"><a href="javascript: popupWindow = new Popup(\'' + i + '\', \''+ key + '\', \''+ _this.channelId + '\');" id="vid"><span class="title">' + _this.videos[i].title + '</span><br /><img src="' + _this.videos[i].thumbnail
              + '" /></a><p>' + multipleDate + ' &bull; ' + _this.videos[i].duration + ' &bull; ' + _this.videos[i].views + ' Views <br /> &uarr; ' + _this.videos[i].likes + ', &darr; ' + _this.videos[i].dislikes
@@ -178,6 +178,9 @@ function Popup(key, chan, chanId) {
     this.closeDialog = function() {
         $(window).unbind("scroll");
         $("#contentWindow").dialog("destroy");
+        $(window).scroll(function(){
+                $("#scroll").stop().animate({"marginTop": ($(window).scrollTop()) + "px", "marginLeft":($(window).scrollLeft()) + "px"}, "slow" );
+        });
     };
     this.replaceVideo = function(key, chan, type) {    //Replaced currently displayed video with one from the queue.
         if (type === "playlist") {
@@ -406,8 +409,12 @@ function User() {
             $("#info3:hidden").show();
             $("#chanList:hidden").show();
             $('#contentArea').show();
+            $('#scroll').show();
             $("#contentArea").tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
             $("#chanList").tooltip({ tooltipClass: "custTooltip", track: "true" });
+            $(window).scroll(function(){
+                $("#scroll").stop().animate({"marginTop": ($(window).scrollTop()) + "px", "marginLeft":($(window).scrollLeft()) + "px"}, "slow" );
+            });
         });
     };
     //Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
