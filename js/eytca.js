@@ -5,7 +5,7 @@ var chanList = [];
 //Displays loading text/percentage with jQueryUI.
 function loading(val, msg) {
     $('.progress-label').text(msg);
-    $("#progressbar").progressbar( "option", "value", val )
+    $("#progressbar").progressbar( "option", "value", val );
 }
 
 function logout() {
@@ -227,7 +227,7 @@ function Popup(key, chan, chanId) {
                 }
             }
         });
-        $("#contentWindow").css("max-height", 0.90*window.innerHeight);
+        $("#contentWindow").css("max-height", 0.95*window.innerHeight);
         $(window).scroll(function() {
             $(window).scrollTop($('.ui-dialog').offset().top);
         });
@@ -286,7 +286,7 @@ function User() {
     };
     this.idOrUsername = this.idCheck();
     this.getInfo = function() {
-        loading(30, 'Requesting user info');
+        loading(30, 'Requesting user info.');
         now = moment().subtract('days', _this.numDaysToDisplay);    //Moment.js formatting.
         if (_this.idOrUsername) {
             request = gapi.client.youtube.channels.list({
@@ -315,23 +315,21 @@ function User() {
     };
     this.getInfo();
     this.getSubscriptions = function(nextPage) {
-        loading(60, 'Requesting user\'s subscriptions');
+        loading(60, 'Requesting user\'s subscriptions. ' + _this.subscriptions.length + ' recieved.');
         if (nextPage) {
             request = gapi.client.youtube.subscriptions.list({
                 part: 'snippet',
                 fields: 'items/snippet,nextPageToken',
                 pageToken: _this.nextPage,
                 channelId: _this.userId,
-                maxResults: 50,
-                order: 'alphabetical'
+                maxResults: 50
             });
         } else {
             request = gapi.client.youtube.subscriptions.list({
                 part: 'snippet',
                 fields: 'items/snippet,nextPageToken,pageInfo',
                 channelId: _this.userId,
-                maxResults: 50,
-                order: 'alphabetical'
+                maxResults: 50
             });
             requestType = 'GetSubscriptions';
         }
@@ -344,7 +342,7 @@ function User() {
                 logout();
             }
             if (_this.totalSubs === 0) {_this.totalSubs = result.pageInfo.totalResults;}
-            loading(80, 'Parsing ' + _this.totalSubs + ' subscriptions');
+            loading(80, 'Parsing ' + _this.totalSubs + ' subscriptions.');
             //Channel creation.
             for (var i = 0; i < result.items.length; i++) {
                 _this.subscriptions[_this.subscriptions.length] = new Channel(result.items[i].snippet.title, result.items[i].snippet.resourceId.channelId, result.items[i].snippet.thumbnails.high.url);
@@ -405,11 +403,7 @@ function User() {
         _this.verifyQueue();
         $("#container").imagesLoaded(function() {
             $('#header').remove();
-            $("#info:hidden").show();
-            $("#info3:hidden").show();
-            $("#chanList:hidden").show();
-            $('#contentArea').show();
-            $('#scroll').show();
+            $("#info:hidden, #info3:hidden, #chanList:hidden, #contentArea:hidden, #scroll:hidden").show();
             $("#contentArea").tooltip({ tooltipClass: "custTooltip", position: { my: "center top", at: "center bottom" } });
             $("#chanList").tooltip({ tooltipClass: "custTooltip", track: "true" });
             $(window).scroll(function(){
@@ -419,8 +413,8 @@ function User() {
     };
     //Called once the last channel has been returned. Checks if all channels are finished requesting their videos.
     this.lastSubCheckTick = function() {
-        if (_this.subscriptions.length >= _this.totalSubs - _this.currentPage && _this.verifyChannels()) {
-            loading(100, 'Loading DOM');
+        if (_this.verifyChannels()) {
+            loading(90, 'Loading DOM');
             //Sorts channel by name. Requesting the channels to be sorted alphabetically is not reliable.
             _this.subscriptions.sort(function(a,b) {return (a.readableName.toLowerCase() > b.readableName.toLowerCase()) ? 1 : ((b.readableName.toLowerCase() > a.readableName.toLowerCase()) ? -1 : 0);} );
             _this.display();

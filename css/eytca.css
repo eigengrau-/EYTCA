@@ -1,4 +1,4 @@
-/*This stylesheet is terrible and will be changed soon.*/
+/*This stylesheet is terrible and will be changed "soon".*/
 
 body {
     background: #222527 url(images/default-tile-dark.png) 50% 50% repeat;
@@ -25,10 +25,10 @@ body {
     background-color: #323739;
     width: auto;
     height: auto;
-    line-height: 50px;
+    padding: 5px;
     position: absolute;
-    top: 1vw;
-    left: 5vw;
+    top: 91%;
+    left: 91%;
     border-radius: 10px;
 }
 
@@ -213,7 +213,8 @@ iframe {
 #info, #info3 {
     margin: 0 0.7564296520423601% 0 0.7564296520423601%;
     width: 27.853253%;
-    height: 32%;
+    /*height: 32%;*/
+    height: 15vw;
     float: left;
     display: none;
     padding: 0.37821482602118006% 0 0 0.37821482602118006%;
@@ -229,7 +230,8 @@ iframe {
 #chanList {
     width: 38.9%;
     margin: 0 0 0 0.7564296520423601%;
-    height: 32%;
+    /*height: 32%;*/
+    height: 15vw;
     float: left;
     display: none;
     padding: 0.37821482602118006% 0 0 0.37821482602118006%;
@@ -256,17 +258,16 @@ iframe {
 }
 
 #noVids, #chan {
-    opacity: 0.8;
+    /*opacity: 0.8;*/
     /*display: inline-block;*/
 }
 #chan:hover, #noVids:hover {
-    opacity: 1.0;
+    /*opacity: 1.0;*/
 }
 
 #infoHome {
     padding: 20px;
     border-radius: 10px;
-    /*max-width: 700px;*/
     width: 40%;
     margin-left: auto;
     margin-right: auto;
