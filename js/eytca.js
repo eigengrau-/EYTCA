@@ -370,6 +370,7 @@ function User() {
             path: "/eytca/",
             expires: 365
         });
+        popupWindow.init();
     };
     this.verifyQueue = function() {
         if ($.cookie("queue")) {
